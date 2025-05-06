@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -18,9 +19,13 @@ import {
   AlertTriangle,
   CheckCircle,
   Clock,
-  BarChart3,
   FileText,
   Shield,
+  AlertCircle,
+  CalendarIcon,
+  Tag,
+  Layers,
+  ExternalLink
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
@@ -28,55 +33,22 @@ import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 import PageLayout from '@/components/PageLayout';
 import { useToast } from '@/hooks/use-toast';
 import { useReports } from '@/contexts/ReportContext';
-
-// Mock data for the dashboard
-const recentReports = [
-  {
-    id: 1,
-    type: 'Harassment',
-    platform: 'Social Media',
-    status: 'New',
-    severity: 'high',
-    date: '2025-05-05',
-    description: 'Repeated negative comments on student\'s social media posts',
-  },
-  {
-    id: 2,
-    type: 'Exclusion',
-    platform: 'School Platform',
-    status: 'In Progress',
-    severity: 'medium',
-    date: '2025-05-04',
-    description: 'Deliberate exclusion from online class group',
-  },
-  {
-    id: 3,
-    type: 'Threats',
-    platform: 'Text Message',
-    status: 'New',
-    severity: 'high',
-    date: '2025-05-04',
-    description: 'Threatening messages sent via text',
-  },
-  {
-    id: 4,
-    type: 'Image Sharing',
-    platform: 'Social Media',
-    status: 'Resolved',
-    severity: 'medium',
-    date: '2025-05-03',
-    description: 'Sharing altered images without consent',
-  },
-  {
-    id: 5,
-    type: 'Hate Speech',
-    platform: 'Online Gaming',
-    status: 'In Progress',
-    severity: 'high',
-    date: '2025-05-02',
-    description: 'Discriminatory language used during online gaming session',
-  },
-];
+import { 
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter
+} from '@/components/ui/dialog';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 // Mock chart data for different time periods
 const chartData7Days = [
@@ -123,7 +95,12 @@ const StatsCard = ({ title, value, icon, description }: { title: string, value: 
   </Card>
 );
 
-const ReportRow = ({ report }: { report: any }) => {
+type ReportRowProps = {
+  report: any; 
+  onViewDetails: (reportId: number) => void;
+};
+
+const ReportRow = ({ report, onViewDetails }: ReportRowProps) => {
   return (
     <div className="py-4 border-b last:border-0">
       <div className="flex justify-between items-start mb-2">
@@ -155,18 +132,42 @@ const ReportRow = ({ report }: { report: any }) => {
           </div>
           <p className="text-sm text-gray-600">{report.platform} • {report.date}</p>
         </div>
-        <Button variant="outline" size="sm" className="text-foreground">View Details</Button>
+        <Button 
+          variant="outline" 
+          size="sm" 
+          className="text-foreground"
+          onClick={() => onViewDetails(report.id)}
+        >
+          View Details
+        </Button>
       </div>
       <p className="text-gray-700">{report.description}</p>
     </div>
   );
 };
 
+const getStatusIcon = (status: string) => {
+  switch (status) {
+    case 'New':
+      return <AlertCircle className="h-5 w-5 text-blue-600" />;
+    case 'In Progress':
+      return <Clock className="h-5 w-5 text-amber-600" />;
+    case 'Resolved':
+      return <CheckCircle className="h-5 w-5 text-green-600" />;
+    default:
+      return <AlertCircle className="h-5 w-5 text-gray-600" />;
+  }
+};
+
 const Dashboard = () => {
   const [filter, setFilter] = useState('all');
   const [periodFilter, setPeriodFilter] = useState('30days');
+  const [selectedReportId, setSelectedReportId] = useState<number | null>(null);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
   const { toast } = useToast();
-  const { reports } = useReports();
+  const { reports, getReportById, updateReportStatus } = useReports();
+
+  const selectedReport = selectedReportId ? getReportById(selectedReportId) : null;
 
   // Get chart data based on selected period
   const getChartData = () => {
@@ -186,6 +187,22 @@ const Dashboard = () => {
       description: "The system is analyzing recent communications for potential cyberbullying incidents.",
       duration: 5000,
     });
+  };
+
+  const handleViewDetails = (reportId: number) => {
+    setSelectedReportId(reportId);
+    setIsDialogOpen(true);
+  };
+
+  const handleStatusUpdate = (newStatus: string) => {
+    if (selectedReportId) {
+      updateReportStatus(selectedReportId, newStatus);
+      toast({
+        title: "Status Updated",
+        description: `Report #${selectedReportId} has been marked as ${newStatus}`,
+        duration: 3000,
+      });
+    }
   };
 
   // Filter reports based on selected filter
@@ -345,7 +362,11 @@ const Dashboard = () => {
                   {filteredReports.length > 0 ? (
                     <div className="divide-y">
                       {filteredReports.map((report) => (
-                        <ReportRow key={report.id} report={report} />
+                        <ReportRow 
+                          key={report.id} 
+                          report={report} 
+                          onViewDetails={handleViewDetails}
+                        />
                       ))}
                     </div>
                   ) : (
@@ -368,6 +389,112 @@ const Dashboard = () => {
           </CardContent>
         </Card>
       </div>
+
+      {/* Report Details Dialog */}
+      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <DialogContent className="sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="text-xl">Report Details</DialogTitle>
+            <DialogDescription>
+              Complete information about the reported incident.
+            </DialogDescription>
+          </DialogHeader>
+
+          {selectedReport ? (
+            <>
+              <div className="py-4">
+                <div className="flex items-center mb-4">
+                  <h3 className="text-lg font-semibold">{selectedReport.type}</h3>
+                  <Badge 
+                    className={`ml-2 ${
+                      selectedReport.severity === 'high' 
+                        ? 'bg-red-100 text-red-800 hover:bg-red-100' 
+                        : selectedReport.severity === 'medium'
+                          ? 'bg-amber-100 text-amber-800 hover:bg-amber-100'
+                          : 'bg-green-100 text-green-800 hover:bg-green-100'
+                    }`}
+                  >
+                    {selectedReport.severity}
+                  </Badge>
+                </div>
+
+                <Table>
+                  <TableBody>
+                    <TableRow>
+                      <TableCell className="font-medium flex items-center">
+                        <Tag className="mr-2 h-4 w-4" />
+                        Status
+                      </TableCell>
+                      <TableCell className="flex items-center">
+                        {getStatusIcon(selectedReport.status)}
+                        <span className="ml-2">{selectedReport.status}</span>
+                      </TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell className="font-medium flex items-center">
+                        <Layers className="mr-2 h-4 w-4" />
+                        Platform
+                      </TableCell>
+                      <TableCell>{selectedReport.platform}</TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell className="font-medium flex items-center">
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        Date Reported
+                      </TableCell>
+                      <TableCell>{selectedReport.date}</TableCell>
+                    </TableRow>
+                  </TableBody>
+                </Table>
+
+                <div className="mt-6">
+                  <h4 className="font-medium mb-2">Description</h4>
+                  <div className="p-3 bg-gray-50 rounded-md">
+                    {selectedReport.description}
+                  </div>
+                </div>
+              </div>
+              
+              <DialogFooter className="sm:justify-between flex flex-col sm:flex-row gap-2">
+                <div className="flex gap-2">
+                  <Button 
+                    variant={selectedReport.status === 'New' ? "default" : "outline"} 
+                    size="sm"
+                    onClick={() => handleStatusUpdate('New')}
+                    disabled={selectedReport.status === 'New'}
+                  >
+                    Mark as New
+                  </Button>
+                  <Button 
+                    variant={selectedReport.status === 'In Progress' ? "default" : "outline"} 
+                    size="sm"
+                    onClick={() => handleStatusUpdate('In Progress')}
+                    disabled={selectedReport.status === 'In Progress'}
+                  >
+                    Mark In Progress
+                  </Button>
+                  <Button 
+                    variant={selectedReport.status === 'Resolved' ? "default" : "outline"} 
+                    size="sm"
+                    onClick={() => handleStatusUpdate('Resolved')}
+                    disabled={selectedReport.status === 'Resolved'}
+                  >
+                    Mark Resolved
+                  </Button>
+                </div>
+                <Button variant="outline" size="sm" className="ml-auto">
+                  <ExternalLink className="h-4 w-4 mr-2" />
+                  Export Report
+                </Button>
+              </DialogFooter>
+            </>
+          ) : (
+            <div className="py-8 text-center">
+              <p>Report information not available.</p>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </PageLayout>
   );
 };

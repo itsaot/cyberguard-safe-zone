@@ -65,12 +65,16 @@ const initialReports = [
 type ReportContextType = {
   reports: Report[];
   addReport: (report: Omit<Report, 'id' | 'status'>) => void;
+  getReportById: (id: number) => Report | undefined;
+  updateReportStatus: (id: number, status: string) => void;
 };
 
 // Create context with default values
 const ReportContext = createContext<ReportContextType>({
   reports: initialReports,
   addReport: () => {},
+  getReportById: () => undefined,
+  updateReportStatus: () => {},
 });
 
 // Provider component
@@ -87,8 +91,20 @@ export const ReportProvider = ({ children }: { children: ReactNode }) => {
     setReports(prevReports => [reportWithId, ...prevReports]);
   };
 
+  const getReportById = (id: number) => {
+    return reports.find(report => report.id === id);
+  };
+
+  const updateReportStatus = (id: number, status: string) => {
+    setReports(prevReports => 
+      prevReports.map(report => 
+        report.id === id ? { ...report, status } : report
+      )
+    );
+  };
+
   return (
-    <ReportContext.Provider value={{ reports, addReport }}>
+    <ReportContext.Provider value={{ reports, addReport, getReportById, updateReportStatus }}>
       {children}
     </ReportContext.Provider>
   );
