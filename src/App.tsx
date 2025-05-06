@@ -8,22 +8,25 @@ import Home from "./pages/Home";
 import ReportForm from "./pages/ReportForm";
 import Dashboard from "./pages/Dashboard";
 import NotFound from "./pages/NotFound";
+import { ReportProvider } from "./contexts/ReportContext";
 
 const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/report" element={<ReportForm />} />
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
+      <ReportProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/report" element={<ReportForm />} />
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </BrowserRouter>
+      </ReportProvider>
     </TooltipProvider>
   </QueryClientProvider>
 );

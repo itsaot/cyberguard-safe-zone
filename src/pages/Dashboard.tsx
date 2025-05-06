@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -27,7 +26,8 @@ import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import PageLayout from '@/components/PageLayout';
-import { useToast } from '@/components/ui/use-toast';
+import { useToast } from '@/hooks/use-toast';
+import { useReports } from '@/contexts/ReportContext';
 
 // Mock data for the dashboard
 const recentReports = [
@@ -123,7 +123,7 @@ const StatsCard = ({ title, value, icon, description }: { title: string, value: 
   </Card>
 );
 
-const ReportRow = ({ report }: { report: typeof recentReports[0] }) => {
+const ReportRow = ({ report }: { report: any }) => {
   return (
     <div className="py-4 border-b last:border-0">
       <div className="flex justify-between items-start mb-2">
@@ -166,6 +166,7 @@ const Dashboard = () => {
   const [filter, setFilter] = useState('all');
   const [periodFilter, setPeriodFilter] = useState('30days');
   const { toast } = useToast();
+  const { reports } = useReports();
 
   // Get chart data based on selected period
   const getChartData = () => {
@@ -187,9 +188,10 @@ const Dashboard = () => {
     });
   };
 
+  // Filter reports based on selected filter
   const filteredReports = filter === 'all' 
-    ? recentReports 
-    : recentReports.filter(report => report.status.toLowerCase() === filter);
+    ? reports 
+    : reports.filter(report => report.status.toLowerCase() === filter);
 
   return (
     <PageLayout>
@@ -214,21 +216,21 @@ const Dashboard = () => {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           <StatsCard 
             title="Total Reports" 
-            value="24" 
+            value={reports.length.toString()} 
             icon={<FileText className="h-6 w-6" />} 
-            description="Last 30 days"
+            description="All time"
           />
           <StatsCard 
             title="Pending Review" 
-            value="8"
+            value={reports.filter(r => r.status === 'New').length.toString()}
             icon={<Clock className="h-6 w-6" />}
             description="Requires attention"
           />
           <StatsCard 
             title="Resolved" 
-            value="16"
+            value={reports.filter(r => r.status === 'Resolved').length.toString()}
             icon={<CheckCircle className="h-6 w-6" />}
-            description="67% resolution rate"
+            description={`${Math.round((reports.filter(r => r.status === 'Resolved').length / reports.length) * 100)}% resolution rate`}
           />
         </div>
         

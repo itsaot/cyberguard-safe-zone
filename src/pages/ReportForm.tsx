@@ -1,5 +1,6 @@
 
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -22,6 +23,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { useToast } from '@/hooks/use-toast';
 import PageLayout from '@/components/PageLayout';
+import { useReports } from '@/contexts/ReportContext';
 
 // Define form schema
 const reportFormSchema = z.object({
@@ -41,6 +43,8 @@ type ReportFormValues = z.infer<typeof reportFormSchema>;
 const ReportForm = () => {
   const [submitted, setSubmitted] = useState(false);
   const { toast } = useToast();
+  const navigate = useNavigate();
+  const { addReport } = useReports();
   
   const form = useForm<ReportFormValues>({
     resolver: zodResolver(reportFormSchema),
@@ -60,15 +64,23 @@ const ReportForm = () => {
   const onSubmit = (data: ReportFormValues) => {
     console.log('Form submitted:', data);
     
-    // In a real app, you would send this data to your backend
-    // For now, we'll just simulate a successful submission
-    setTimeout(() => {
-      toast({
-        title: "Report submitted successfully",
-        description: "Thank you for helping to create a safer environment.",
-      });
-      setSubmitted(true);
-    }, 1500);
+    // Add the new report to our context
+    addReport({
+      type: data.incidentType,
+      platform: data.platform,
+      severity: data.severity,
+      date: data.date || new Date().toISOString().split('T')[0],
+      description: data.description,
+    });
+    
+    toast({
+      title: "Report submitted successfully",
+      description: "Thank you for helping to create a safer environment.",
+    });
+    setSubmitted(true);
+    
+    // Option to navigate to dashboard automatically
+    // setTimeout(() => navigate('/dashboard'), 3000);
   };
 
   if (submitted) {
