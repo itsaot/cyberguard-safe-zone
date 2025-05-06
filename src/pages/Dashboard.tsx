@@ -27,6 +27,7 @@ import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import PageLayout from '@/components/PageLayout';
+import { useToast } from '@/components/ui/use-toast';
 
 // Mock data for the dashboard
 const recentReports = [
@@ -77,12 +78,32 @@ const recentReports = [
   },
 ];
 
-const chartData = [
+// Mock chart data for different time periods
+const chartData7Days = [
+  { name: 'Mon', reports: 2 },
+  { name: 'Tue', reports: 4 },
+  { name: 'Wed', reports: 1 },
+  { name: 'Thu', reports: 3 },
+  { name: 'Fri', reports: 5 },
+  { name: 'Sat', reports: 2 },
+  { name: 'Sun', reports: 1 },
+];
+
+const chartData30Days = [
   { name: 'Jan', reports: 4 },
   { name: 'Feb', reports: 7 },
   { name: 'Mar', reports: 5 },
   { name: 'Apr', reports: 10 },
   { name: 'May', reports: 8 },
+];
+
+const chartData90Days = [
+  { name: 'Jan', reports: 10 },
+  { name: 'Feb', reports: 15 },
+  { name: 'Mar', reports: 12 },
+  { name: 'Apr', reports: 18 },
+  { name: 'May', reports: 20 },
+  { name: 'Jun', reports: 15 },
 ];
 
 const StatsCard = ({ title, value, icon, description }: { title: string, value: string, icon: JSX.Element, description?: string }) => (
@@ -134,7 +155,7 @@ const ReportRow = ({ report }: { report: typeof recentReports[0] }) => {
           </div>
           <p className="text-sm text-gray-600">{report.platform} • {report.date}</p>
         </div>
-        <Button variant="outline" size="sm">View Details</Button>
+        <Button variant="outline" size="sm" className="text-foreground">View Details</Button>
       </div>
       <p className="text-gray-700">{report.description}</p>
     </div>
@@ -143,6 +164,28 @@ const ReportRow = ({ report }: { report: typeof recentReports[0] }) => {
 
 const Dashboard = () => {
   const [filter, setFilter] = useState('all');
+  const [periodFilter, setPeriodFilter] = useState('30days');
+  const { toast } = useToast();
+
+  // Get chart data based on selected period
+  const getChartData = () => {
+    switch (periodFilter) {
+      case '7days':
+        return chartData7Days;
+      case '90days':
+        return chartData90Days;
+      default:
+        return chartData30Days;
+    }
+  };
+
+  const handleSafetyCheck = () => {
+    toast({
+      title: "Safety Check Started",
+      description: "The system is analyzing recent communications for potential cyberbullying incidents.",
+      duration: 5000,
+    });
+  };
 
   const filteredReports = filter === 'all' 
     ? recentReports 
@@ -161,7 +204,7 @@ const Dashboard = () => {
               <FileText className="mr-2 h-4 w-4" />
               Export Reports
             </Button>
-            <Button className="cg-button-primary">
+            <Button className="cg-button-primary" onClick={handleSafetyCheck}>
               <Shield className="mr-2 h-4 w-4" />
               Run Safety Check
             </Button>
@@ -194,7 +237,7 @@ const Dashboard = () => {
             <CardHeader>
               <CardTitle className="flex items-center justify-between">
                 <span>Incident Trends</span>
-                <Select defaultValue="30days">
+                <Select value={periodFilter} onValueChange={setPeriodFilter}>
                   <SelectTrigger className="w-36">
                     <SelectValue placeholder="Select period" />
                   </SelectTrigger>
@@ -210,7 +253,7 @@ const Dashboard = () => {
               <div className="h-72">
                 <ResponsiveContainer width="100%" height="100%">
                   <AreaChart
-                    data={chartData}
+                    data={getChartData()}
                     margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
                   >
                     <CartesianGrid strokeDasharray="3 3" />
