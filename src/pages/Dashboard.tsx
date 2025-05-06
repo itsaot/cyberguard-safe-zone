@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -160,6 +159,20 @@ const getStatusIcon = (status: string) => {
 };
 
 const Dashboard = () => {
+  const { isAdmin } = useAuth();
+  const navigate = useNavigate();
+  
+  useEffect(() => {
+    if (!isAdmin) {
+      navigate('/admin');
+    }
+  }, [isAdmin, navigate]);
+
+  // Only render dashboard content if user is admin
+  if (!isAdmin) {
+    return null; // Or a loading indicator
+  }
+
   const [filter, setFilter] = useState('all');
   const [periodFilter, setPeriodFilter] = useState('30days');
   const [selectedReportId, setSelectedReportId] = useState<number | null>(null);
