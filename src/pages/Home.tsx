@@ -156,7 +156,7 @@ const Home = () => {
                   </Button>
                 </Link>
                 <Link to="/dashboard">
-                  <Button variant="outline" className="border-white text-white hover:bg-blue-700 w-full sm:w-auto">
+                  <Button variant="outline" className="border-white text-black hover:bg-blue-700 w-full sm:w-auto">
                     View Dashboard
                   </Button>
                 </Link>
