@@ -21,7 +21,10 @@ const Navbar = () => {
           <Link to="/" className="text-gray-700 hover:text-cyberguard-blue transition-colors">
             Home
           </Link>
-          <Link to="/report" className="text-gray-700 hover:text-cyberguard-blue transition-colors">
+          <Link to="/forum" className="text-gray-700 hover:text-cyberguard-blue transition-colors">
+            Forum
+          </Link>
+          <Link to="/report-incident" className="text-gray-700 hover:text-cyberguard-blue transition-colors">
             Report Incident
           </Link>
           {isAdmin ? (
@@ -36,7 +39,7 @@ const Navbar = () => {
         </div>
         
         <div className="hidden md:flex md:items-center md:space-x-4">
-          <Link to="/report">
+          <Link to="/report-incident">
             <Button className="cg-button-primary">Report Now</Button>
           </Link>
           
