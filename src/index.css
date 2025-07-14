@@ -5,43 +5,35 @@
 
 @layer base {
   :root {
-    --background: 220 15% 8%;
-    --foreground: 210 40% 95%;
+    --background: 210 40% 98%;
+    --foreground: 222 47% 11%;
 
-    --card: 220 15% 10%;
-    --card-foreground: 210 40% 95%;
+    --card: 0 0% 100%;
+    --card-foreground: 222 47% 11%;
 
-    --popover: 220 15% 10%;
-    --popover-foreground: 210 40% 95%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 47% 11%;
 
-    --primary: 195 100% 60%;
-    --primary-foreground: 220 15% 8%;
+    --primary: 210 100% 65%;
+    --primary-foreground: 210 40% 98%;
 
-    --secondary: 160 100% 45%;
-    --secondary-foreground: 220 15% 8%;
+    --secondary: 162 44% 58%;
+    --secondary-foreground: 355 100% 100%;
 
-    --muted: 220 15% 15%;
-    --muted-foreground: 215 20% 65%;
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
 
-    --accent: 270 100% 70%;
-    --accent-foreground: 220 15% 8%;
+    --accent: 176 35% 93%;
+    --accent-foreground: 222.2 47.4% 11.2%;
 
-    --destructive: 0 84% 60%;
+    --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
 
-    --border: 220 15% 20%;
-    --input: 220 15% 15%;
-    --ring: 195 100% 60%;
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 222.2 84% 4.9%;
 
-    --radius: 1rem;
-    
-    /* Custom cybersecurity theme colors */
-    --cyber-blue: 195 100% 60%;
-    --cyber-green: 160 100% 45%;
-    --cyber-purple: 270 100% 70%;
-    --cyber-dark: 220 15% 8%;
-    --cyber-surface: 220 15% 10%;
-    --cyber-border: 220 15% 20%;
+    --radius: 0.75rem;
 
     --sidebar-background: 0 0% 98%;
     --sidebar-foreground: 240 5.3% 26.1%;
@@ -53,34 +45,34 @@
     --sidebar-ring: 217.2 91.2% 59.8%;
   }
 
-  .light {
-    --background: 210 40% 98%;
-    --foreground: 222 47% 11%;
+  .dark {
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
 
-    --card: 0 0% 100%;
-    --card-foreground: 222 47% 11%;
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 222 47% 11%;
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
 
-    --primary: 195 100% 60%;
-    --primary-foreground: 210 40% 98%;
+    --primary: 210 100% 65%;
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 160 100% 45%;
+    --secondary: 162 44% 58%;
     --secondary-foreground: 0 0% 100%;
 
-    --muted: 210 40% 96%;
-    --muted-foreground: 215 16% 47%;
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
 
-    --accent: 270 100% 70%;
+    --accent: 176 35% 20%;
     --accent-foreground: 0 0% 100%;
 
-    --destructive: 0 84% 60%;
+    --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 210 40% 98%;
 
-    --border: 214 32% 91%;
-    --input: 214 32% 91%;
-    --ring: 195 100% 60%;
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 212.7 26.8% 83.9%;
   }
 }
 
@@ -100,35 +92,19 @@
 }
 
 @layer components {
-  .cyber-container {
-    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+  .cg-container {
+    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8;
   }
 
-  .cyber-gradient {
-    background: linear-gradient(135deg, hsl(var(--cyber-dark)), hsl(var(--cyber-surface)));
+  .cg-card {
+    @apply bg-white rounded-xl shadow-md p-6 hover:shadow-lg transition-shadow duration-300;
   }
 
-  .cyber-gradient-blue {
-    background: linear-gradient(135deg, hsl(var(--cyber-blue) / 0.1), hsl(var(--cyber-blue) / 0.05));
+  .cg-button-primary {
+    @apply bg-cyberguard-blue text-white rounded-lg px-5 py-2.5 hover:bg-blue-600 transition-colors duration-200;
   }
 
-  .cyber-gradient-accent {
-    background: linear-gradient(135deg, hsl(var(--cyber-blue)), hsl(var(--cyber-purple)));
-  }
-
-  .cyber-glass {
-    @apply bg-card/10 backdrop-blur-md border border-border/20;
-  }
-
-  .cyber-glow {
-    box-shadow: 0 0 40px hsl(var(--cyber-blue) / 0.3);
-  }
-
-  .cyber-text-glow {
-    text-shadow: 0 0 20px hsl(var(--cyber-blue) / 0.5);
-  }
-
-  .hover-lift {
-    @apply transition-transform duration-300 hover:-translate-y-2;
+  .cg-button-secondary {
+    @apply bg-cyberguard-green text-white rounded-lg px-5 py-2.5 hover:bg-green-600 transition-colors duration-200;
   }
 }
