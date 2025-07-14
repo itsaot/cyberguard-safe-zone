@@ -5,35 +5,57 @@
 
 @layer base {
   :root {
-    --background: 210 40% 98%;
-    --foreground: 222 47% 11%;
+    --background: 0 0% 100%;
+    --foreground: 220 10% 15%;
 
     --card: 0 0% 100%;
-    --card-foreground: 222 47% 11%;
+    --card-foreground: 220 10% 15%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 222 47% 11%;
+    --popover-foreground: 220 10% 15%;
 
-    --primary: 210 100% 65%;
-    --primary-foreground: 210 40% 98%;
+    --primary: 210 100% 56%;
+    --primary-foreground: 0 0% 98%;
 
-    --secondary: 162 44% 58%;
-    --secondary-foreground: 355 100% 100%;
+    --secondary: 210 40% 98%;
+    --secondary-foreground: 220 10% 15%;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    --muted: 210 40% 98%;
+    --muted-foreground: 215 16% 47%;
 
-    --accent: 176 35% 93%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    --accent: 210 40% 98%;
+    --accent-foreground: 220 10% 15%;
 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 98%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    --border: 214 32% 91%;
+    --input: 214 32% 91%;
+    --ring: 210 100% 56%;
 
     --radius: 0.75rem;
+
+    /* Premium colors for tech brand look */
+    --tech-blue: 210 100% 56%;
+    --tech-blue-light: 210 100% 97%;
+    --tech-green: 142 76% 47%;
+    --tech-green-light: 142 76% 97%;
+    --tech-purple: 262 83% 58%;
+    --tech-purple-light: 262 83% 97%;
+    --tech-gray: 215 28% 17%;
+    --tech-gray-light: 215 20% 65%;
+    --tech-surface: 0 0% 99%;
+    --tech-surface-elevated: 0 0% 100%;
+
+    /* Gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(var(--tech-blue)), hsl(var(--tech-purple)));
+    --gradient-subtle: linear-gradient(180deg, hsl(var(--tech-surface)), hsl(var(--tech-blue-light)));
+    --gradient-card: linear-gradient(145deg, hsl(var(--tech-surface-elevated)), hsl(var(--tech-blue-light) / 0.3));
+
+    /* Shadows */
+    --shadow-tech: 0 4px 20px -2px hsl(var(--tech-blue) / 0.1);
+    --shadow-card: 0 8px 32px -4px hsl(var(--tech-gray) / 0.1);
+    --shadow-elegant: 0 12px 40px -8px hsl(var(--tech-blue) / 0.15);
 
     --sidebar-background: 0 0% 98%;
     --sidebar-foreground: 240 5.3% 26.1%;
@@ -92,19 +114,81 @@
 }
 
 @layer components {
-  .cg-container {
-    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8;
+  .tech-container {
+    @apply max-w-7xl mx-auto px-6 sm:px-8 lg:px-12;
   }
 
-  .cg-card {
-    @apply bg-white rounded-xl shadow-md p-6 hover:shadow-lg transition-shadow duration-300;
+  .tech-section {
+    @apply py-20 sm:py-24 lg:py-28;
   }
 
-  .cg-button-primary {
-    @apply bg-cyberguard-blue text-white rounded-lg px-5 py-2.5 hover:bg-blue-600 transition-colors duration-200;
+  .tech-card {
+    @apply bg-[hsl(var(--tech-surface-elevated))] rounded-2xl p-8 shadow-[var(--shadow-card)] 
+           hover:shadow-[var(--shadow-elegant)] transition-all duration-500 border border-[hsl(var(--border))]
+           hover:scale-[1.02] hover:-translate-y-1;
   }
 
-  .cg-button-secondary {
-    @apply bg-cyberguard-green text-white rounded-lg px-5 py-2.5 hover:bg-green-600 transition-colors duration-200;
+  .tech-button-primary {
+    @apply bg-[hsl(var(--tech-blue))] text-white rounded-xl px-8 py-4 font-medium 
+           hover:bg-[hsl(var(--tech-blue)_/_0.9)] transition-all duration-300 
+           shadow-[var(--shadow-tech)] hover:shadow-[var(--shadow-elegant)] 
+           hover:scale-105 active:scale-95;
+  }
+
+  .tech-button-secondary {
+    @apply bg-transparent border-2 border-[hsl(var(--tech-blue))] text-[hsl(var(--tech-blue))] 
+           rounded-xl px-8 py-4 font-medium hover:bg-[hsl(var(--tech-blue))] 
+           hover:text-white transition-all duration-300 hover:scale-105 active:scale-95;
+  }
+
+  .tech-gradient-text {
+    @apply bg-gradient-to-r from-[hsl(var(--tech-blue))] to-[hsl(var(--tech-purple))] 
+           bg-clip-text text-transparent;
+  }
+
+  .tech-glass {
+    @apply bg-white/60 backdrop-blur-lg border border-white/20 shadow-[var(--shadow-card)];
+  }
+
+  .tech-hero-text {
+    @apply text-5xl sm:text-6xl lg:text-7xl font-extralight tracking-tight leading-[1.1];
+  }
+
+  .tech-body-text {
+    @apply text-lg sm:text-xl leading-relaxed text-[hsl(var(--tech-gray-light))];
+  }
+
+  .tech-icon-container {
+    @apply w-16 h-16 rounded-2xl bg-gradient-to-br from-[hsl(var(--tech-blue-light))] 
+           to-[hsl(var(--tech-purple-light))] flex items-center justify-center mb-6
+           shadow-[var(--shadow-tech)];
+  }
+
+  .floating-animation {
+    animation: float 6s ease-in-out infinite;
+  }
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+  }
+
+  .scale-on-hover {
+    @apply transition-transform duration-500 hover:scale-110;
+  }
+
+  .fade-in-up {
+    @apply animate-[fadeInUp_0.8s_ease-out_forwards] opacity-0;
+  }
+
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
   }
 }

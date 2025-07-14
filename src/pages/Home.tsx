@@ -10,128 +10,131 @@ const Home = () => {
   return (
     <PageLayout>
       {/* Hero Section */}
-      <section className="bg-gradient-to-b from-cyberguard-light-blue to-white py-16">
-        <div className="cg-container">
-          <div className="grid md:grid-cols-2 gap-8 items-center">
-            <div className="space-y-6 animate-fade-in">
-              <h1 className="text-4xl md:text-5xl font-bold text-gray-800">
-                Protecting Students in the Digital World
+      <section className="tech-section bg-gradient-to-br from-[hsl(var(--tech-surface))] via-[hsl(var(--tech-blue-light))] to-[hsl(var(--tech-purple-light))]">
+        <div className="tech-container">
+          <div className="grid lg:grid-cols-2 gap-16 items-center">
+            <div className="space-y-8 fade-in-up">
+              <h1 className="tech-hero-text text-[hsl(var(--foreground))]">
+                Protecting Students in the 
+                <span className="tech-gradient-text"> Digital World</span>
               </h1>
-              <p className="text-lg text-gray-600 max-w-lg">
+              <p className="tech-body-text max-w-2xl">
                 CyberGuard helps schools detect, prevent, and address cyberbullying incidents
                 to create a safer learning environment for all students.
               </p>
-              <div className="flex flex-col sm:flex-row gap-4">
+              <div className="flex flex-col sm:flex-row gap-6 pt-4">
                 <Link to="/report">
-                  <Button className="cg-button-primary w-full sm:w-auto">Report an Incident</Button>
+                  <Button className="tech-button-primary text-lg">Report an Incident</Button>
                 </Link>
                 <Link to="/dashboard">
-                  <Button variant="outline" className="w-full sm:w-auto">View Dashboard</Button>
+                  <Button className="tech-button-secondary text-lg">View Dashboard</Button>
                 </Link>
               </div>
             </div>
-            <div className="flex justify-center">
-              <img 
-                src="https://www.crisisprevention.com/contentassets/aa97c2d1ad6a4d74a688c072feb84619/bullytrauma_498574384.jpg?format=webp&ranchor=5"
-                alt="Child experiencing bullying - representing the need for safe digital environments"
-                className="rounded-xl shadow-lg max-h-96 object-cover"
-              />
+            <div className="flex justify-center lg:justify-end">
+              <div className="relative">
+                <img 
+                  src="https://www.crisisprevention.com/contentassets/aa97c2d1ad6a4d74a688c072feb84619/bullytrauma_498574384.jpg?format=webp&ranchor=5"
+                  alt="Child experiencing bullying - representing the need for safe digital environments"
+                  className="rounded-3xl shadow-[var(--shadow-elegant)] max-h-[500px] w-full object-cover floating-animation"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-[hsl(var(--tech-blue)_/_0.1)] to-transparent rounded-3xl"></div>
+              </div>
             </div>
           </div>
         </div>
       </section>
 
       {/* Benefits Section */}
-      <section className="py-16">
-        <div className="cg-container">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-semibold text-gray-800 mb-3">How CyberGuard Helps</h2>
-            <p className="text-gray-600 max-w-2xl mx-auto">
+      <section className="tech-section bg-[hsl(var(--tech-surface))]">
+        <div className="tech-container">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl sm:text-5xl font-light text-[hsl(var(--foreground))] mb-6 tracking-tight">
+              How <span className="tech-gradient-text">CyberGuard</span> Helps
+            </h2>
+            <p className="tech-body-text max-w-3xl mx-auto">
               Our comprehensive approach helps schools create a safer digital environment
               for all students through early detection and intervention.
             </p>
           </div>
           
-          <div className="grid md:grid-cols-3 gap-8">
-            <Card className="cg-card">
-              <CardContent className="pt-6 text-center">
-                <div className="mb-4 flex justify-center">
-                  <AlertTriangle className="h-12 w-12 text-cyberguard-blue" />
-                </div>
-                <h3 className="text-xl font-semibold mb-2">Early Detection</h3>
-                <p className="text-gray-600">
-                  Identify potential cyberbullying incidents before they escalate 
-                  through our anonymous reporting system.
-                </p>
-              </CardContent>
-            </Card>
+          <div className="grid lg:grid-cols-3 gap-8 lg:gap-12">
+            <div className="tech-card text-center group">
+              <div className="tech-icon-container mx-auto">
+                <AlertTriangle className="h-8 w-8 text-[hsl(var(--tech-blue))] scale-on-hover" />
+              </div>
+              <h3 className="text-2xl font-medium mb-4 text-[hsl(var(--foreground))]">Early Detection</h3>
+              <p className="tech-body-text text-base">
+                Identify potential cyberbullying incidents before they escalate 
+                through our anonymous reporting system.
+              </p>
+            </div>
             
-            <Card className="cg-card">
-              <CardContent className="pt-6 text-center">
-                <div className="mb-4 flex justify-center">
-                  <Heart className="h-12 w-12 text-cyberguard-green" />
-                </div>
-                <h3 className="text-xl font-semibold mb-2">Support Resources</h3>
-                <p className="text-gray-600">
-                  Provide students and staff with resources to address cyberbullying
-                  and promote positive digital citizenship.
-                </p>
-              </CardContent>
-            </Card>
+            <div className="tech-card text-center group">
+              <div className="tech-icon-container mx-auto">
+                <Heart className="h-8 w-8 text-[hsl(var(--tech-green))] scale-on-hover" />
+              </div>
+              <h3 className="text-2xl font-medium mb-4 text-[hsl(var(--foreground))]">Support Resources</h3>
+              <p className="tech-body-text text-base">
+                Provide students and staff with resources to address cyberbullying
+                and promote positive digital citizenship.
+              </p>
+            </div>
             
-            <Card className="cg-card">
-              <CardContent className="pt-6 text-center">
-                <div className="mb-4 flex justify-center">
-                  <CheckCircle className="h-12 w-12 text-cyberguard-blue" />
-                </div>
-                <h3 className="text-xl font-semibold mb-2">Data Insights</h3>
-                <p className="text-gray-600">
-                  Track patterns and trends to develop effective prevention 
-                  strategies tailored to your school's needs.
-                </p>
-              </CardContent>
-            </Card>
+            <div className="tech-card text-center group">
+              <div className="tech-icon-container mx-auto">
+                <CheckCircle className="h-8 w-8 text-[hsl(var(--tech-purple))] scale-on-hover" />
+              </div>
+              <h3 className="text-2xl font-medium mb-4 text-[hsl(var(--foreground))]">Data Insights</h3>
+              <p className="tech-body-text text-base">
+                Track patterns and trends to develop effective prevention 
+                strategies tailored to your school's needs.
+              </p>
+            </div>
           </div>
         </div>
       </section>
 
       {/* How It Works Section */}
-      <section className="py-16 bg-cyberguard-light-green">
-        <div className="cg-container">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-semibold text-gray-800 mb-3">How It Works</h2>
-            <p className="text-gray-600 max-w-2xl mx-auto">
+      <section className="tech-section bg-gradient-to-b from-[hsl(var(--tech-blue-light))] to-[hsl(var(--tech-green-light))]">
+        <div className="tech-container">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl sm:text-5xl font-light text-[hsl(var(--foreground))] mb-6 tracking-tight">How It Works</h2>
+            <p className="tech-body-text max-w-3xl mx-auto">
               CyberGuard makes it simple to report and address cyberbullying incidents.
             </p>
           </div>
           
-          <div className="grid md:grid-cols-3 gap-6">
-            <div className="bg-white p-6 rounded-xl shadow flex flex-col items-center text-center">
-              <div className="bg-cyberguard-light-blue h-12 w-12 rounded-full flex items-center justify-center mb-4">
-                <span className="font-semibold text-cyberguard-blue">1</span>
+          <div className="grid lg:grid-cols-3 gap-8 lg:gap-12">
+            <div className="tech-glass rounded-3xl p-8 text-center group hover:scale-105 transition-all duration-500">
+              <div className="w-20 h-20 rounded-3xl bg-gradient-to-br from-[hsl(var(--tech-blue))] to-[hsl(var(--tech-purple))] 
+                            flex items-center justify-center mx-auto mb-6 shadow-[var(--shadow-tech)]">
+                <span className="text-3xl font-light text-white">1</span>
               </div>
-              <h3 className="text-lg font-medium mb-2">Report Incident</h3>
-              <p className="text-sm text-gray-600">
+              <h3 className="text-xl font-medium mb-4 text-[hsl(var(--foreground))]">Report Incident</h3>
+              <p className="text-[hsl(var(--tech-gray-light))] leading-relaxed">
                 Students or witnesses anonymously submit information about cyberbullying incidents.
               </p>
             </div>
             
-            <div className="bg-white p-6 rounded-xl shadow flex flex-col items-center text-center">
-              <div className="bg-cyberguard-light-blue h-12 w-12 rounded-full flex items-center justify-center mb-4">
-                <span className="font-semibold text-cyberguard-blue">2</span>
+            <div className="tech-glass rounded-3xl p-8 text-center group hover:scale-105 transition-all duration-500">
+              <div className="w-20 h-20 rounded-3xl bg-gradient-to-br from-[hsl(var(--tech-green))] to-[hsl(var(--tech-blue))] 
+                            flex items-center justify-center mx-auto mb-6 shadow-[var(--shadow-tech)]">
+                <span className="text-3xl font-light text-white">2</span>
               </div>
-              <h3 className="text-lg font-medium mb-2">Review & Assessment</h3>
-              <p className="text-sm text-gray-600">
+              <h3 className="text-xl font-medium mb-4 text-[hsl(var(--foreground))]">Review & Assessment</h3>
+              <p className="text-[hsl(var(--tech-gray-light))] leading-relaxed">
                 School staff review submitted reports and assess the severity and appropriate response.
               </p>
             </div>
             
-            <div className="bg-white p-6 rounded-xl shadow flex flex-col items-center text-center">
-              <div className="bg-cyberguard-light-blue h-12 w-12 rounded-full flex items-center justify-center mb-4">
-                <span className="font-semibold text-cyberguard-blue">3</span>
+            <div className="tech-glass rounded-3xl p-8 text-center group hover:scale-105 transition-all duration-500">
+              <div className="w-20 h-20 rounded-3xl bg-gradient-to-br from-[hsl(var(--tech-purple))] to-[hsl(var(--tech-green))] 
+                            flex items-center justify-center mx-auto mb-6 shadow-[var(--shadow-tech)]">
+                <span className="text-3xl font-light text-white">3</span>
               </div>
-              <h3 className="text-lg font-medium mb-2">Take Action</h3>
-              <p className="text-sm text-gray-600">
+              <h3 className="text-xl font-medium mb-4 text-[hsl(var(--foreground))]">Take Action</h3>
+              <p className="text-[hsl(var(--tech-gray-light))] leading-relaxed">
                 Implement appropriate interventions based on school policies and provide support resources.
               </p>
             </div>
@@ -140,27 +143,38 @@ const Home = () => {
       </section>
 
       {/* CTA Section */}
-      <section className="py-16">
-        <div className="cg-container">
-          <div className="bg-cyberguard-blue rounded-xl p-8 md:p-12">
-            <div className="max-w-2xl mx-auto text-center">
-              <h2 className="text-2xl md:text-3xl font-bold text-white mb-4">
-                Ready to create a safer digital environment?
-              </h2>
-              <p className="text-blue-100 mb-6">
-                Join schools across the country that are taking a stand against cyberbullying.
-              </p>
-              <div className="flex flex-col sm:flex-row justify-center gap-4">
-                <Link to="/report">
-                  <Button className="bg-white text-cyberguard-blue hover:bg-gray-100 w-full sm:w-auto">
-                    Report an Incident
-                  </Button>
-                </Link>
-                <Link to="/dashboard">
-                  <Button variant="outline" className="border-white text-black hover:bg-blue-700 w-full sm:w-auto">
-                    View Dashboard
-                  </Button>
-                </Link>
+      <section className="tech-section bg-[hsl(var(--tech-surface))]">
+        <div className="tech-container">
+          <div className="relative">
+            <div className="bg-gradient-to-br from-[hsl(var(--tech-blue))] to-[hsl(var(--tech-purple))] 
+                          rounded-3xl p-12 lg:p-16 text-center shadow-[var(--shadow-elegant)] overflow-hidden">
+              {/* Background decoration */}
+              <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent"></div>
+              
+              <div className="relative z-10 max-w-4xl mx-auto">
+                <h2 className="text-3xl sm:text-4xl lg:text-5xl font-light text-white mb-6 tracking-tight">
+                  Ready to create a safer digital environment?
+                </h2>
+                <p className="text-xl text-white/90 mb-10 max-w-2xl mx-auto leading-relaxed">
+                  Join schools across the country that are taking a stand against cyberbullying.
+                </p>
+                <div className="flex flex-col sm:flex-row justify-center gap-6">
+                  <Link to="/report">
+                    <Button className="bg-white text-[hsl(var(--tech-blue))] hover:bg-white/90 
+                                     px-10 py-4 text-lg font-medium rounded-xl 
+                                     hover:scale-105 transition-all duration-300 shadow-lg">
+                      Report an Incident
+                    </Button>
+                  </Link>
+                  <Link to="/dashboard">
+                    <Button className="bg-transparent border-2 border-white text-white 
+                                     hover:bg-white hover:text-[hsl(var(--tech-blue))] 
+                                     px-10 py-4 text-lg font-medium rounded-xl 
+                                     hover:scale-105 transition-all duration-300">
+                      View Dashboard
+                    </Button>
+                  </Link>
+                </div>
               </div>
             </div>
           </div>
