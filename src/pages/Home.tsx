@@ -4,6 +4,7 @@ import { Shield, Heart, AlertTriangle, CheckCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import PageLayout from '@/components/PageLayout';
+import sadChildImage from '@/assets/sad-child-africa.jpg';
 
 const Home = () => {
   return (
@@ -31,8 +32,8 @@ const Home = () => {
             </div>
             <div className="flex justify-center">
               <img 
-                src="https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&q=80&w=800&ixlib=rb-4.0.3"
-                alt="Students using digital devices" 
+                src={sadChildImage}
+                alt="Child experiencing bullying - representing the need for safe digital environments" 
                 className="rounded-xl shadow-lg max-h-96 object-cover"
               />
             </div>
