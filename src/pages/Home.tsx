@@ -32,8 +32,8 @@ const Home = () => {
             </div>
             <div className="flex justify-center">
               <img 
-                src={sadChildImage}
-                alt="Child experiencing bullying - representing the need for safe digital environments" 
+                src="/src/assets/sad-child-africa.jpg"
+                alt="Child experiencing bullying - representing the need for safe digital environments"
                 className="rounded-xl shadow-lg max-h-96 object-cover"
               />
             </div>
