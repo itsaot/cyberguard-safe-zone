@@ -32,7 +32,7 @@ const Home = () => {
             </div>
             <div className="flex justify-center">
               <img 
-                src="/src/assets/sad-child-africa.jpg"
+                src="https://www.crisisprevention.com/contentassets/aa97c2d1ad6a4d74a688c072feb84619/bullytrauma_498574384.jpg?format=webp&ranchor=5"
                 alt="Child experiencing bullying - representing the need for safe digital environments"
                 className="rounded-xl shadow-lg max-h-96 object-cover"
               />
