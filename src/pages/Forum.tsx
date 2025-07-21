@@ -10,6 +10,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import PageLayout from '@/components/PageLayout';
+import { useToast } from '@/hooks/use-toast';
 
 // Mock data for forum posts
 const forumPosts = [
@@ -20,8 +21,6 @@ const forumPosts = [
     category: "Verbal Bullying",
     author: "Anonymous User",
     timestamp: "2 hours ago",
-    likes: 12,
-    comments: 5,
     isAdviceSeeker: true,
     school: "Central High School",
     tags: ["advice-needed", "school", "self-esteem"]
@@ -33,8 +32,6 @@ const forumPosts = [
     category: "Cyberbullying",
     author: "Anonymous User",
     timestamp: "5 hours ago",
-    likes: 8,
-    comments: 3,
     isAdviceSeeker: true,
     school: "West Side Academy",
     tags: ["cyberbullying", "social-media", "rumors"]
@@ -46,8 +43,6 @@ const forumPosts = [
     category: "Physical Bullying",
     author: "Anonymous User",
     timestamp: "1 day ago",
-    likes: 15,
-    comments: 8,
     isAdviceSeeker: true,
     school: "North Valley School",
     tags: ["physical", "safety", "urgent"]
@@ -55,7 +50,7 @@ const forumPosts = [
 ];
 
 const ForumPost = ({ post, onFlag }: { post: any, onFlag: (id: number) => void }) => {
-  const [liked, setLiked] = useState(false);
+  const { toast } = useToast();
   
   return (
     <Card className="mb-4">
@@ -110,21 +105,7 @@ const ForumPost = ({ post, onFlag }: { post: any, onFlag: (id: number) => void }
           ))}
         </div>
         
-        <div className="flex items-center gap-4">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setLiked(!liked)}
-            className={liked ? "text-red-500" : ""}
-          >
-            <Heart className={`h-4 w-4 mr-1 ${liked ? 'fill-current' : ''}`} />
-            {post.likes + (liked ? 1 : 0)}
-          </Button>
-          <Button variant="ghost" size="sm">
-            <MessageSquare className="h-4 w-4 mr-1" />
-            {post.comments} Comments
-          </Button>
-        </div>
+        {/* Removed likes and comments section as requested */}
       </CardContent>
     </Card>
   );
@@ -136,6 +117,7 @@ const CreatePostDialog = () => {
   const [content, setContent] = useState('');
   const [isAdviceSeeker, setIsAdviceSeeker] = useState(false);
   const [school, setSchool] = useState('');
+  const { toast } = useToast();
 
   return (
     <Dialog>
@@ -205,7 +187,11 @@ const CreatePostDialog = () => {
             <Label htmlFor="advice">I'm seeking advice and support</Label>
           </div>
           
-          <Button className="w-full">Post Anonymously</Button>
+          <Button className="w-full" onClick={() => toast({
+            title: "Feature Coming Soon",
+            description: "Anonymous posting feature is currently under development.",
+            duration: 3000,
+          })}>Post Anonymously</Button>
         </div>
       </DialogContent>
     </Dialog>
@@ -216,9 +202,14 @@ const Forum = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('all');
   const [sortBy, setSortBy] = useState('recent');
+  const { toast } = useToast();
 
   const handleFlag = (postId: number) => {
-    alert(`Post ${postId} has been flagged for review by moderators.`);
+    toast({
+      title: "Feature Coming Soon",
+      description: "Post flagging feature is currently under development.",
+      duration: 3000,
+    });
   };
 
   const filteredPosts = forumPosts.filter(post => {
@@ -309,7 +300,11 @@ const Forum = () => {
                 </CardHeader>
                 <CardContent>
                   <p className="text-gray-600 mb-4">Connect with others who have experienced physical intimidation</p>
-                  <Button variant="outline" className="w-full">Join Group</Button>
+                  <Button variant="outline" className="w-full" onClick={() => toast({
+                    title: "Feature Coming Soon", 
+                    description: "Support groups feature is currently under development.",
+                    duration: 3000,
+                  })}>Join Group</Button>
                 </CardContent>
               </Card>
               
@@ -319,7 +314,11 @@ const Forum = () => {
                 </CardHeader>
                 <CardContent>
                   <p className="text-gray-600 mb-4">Get support for online harassment and digital safety</p>
-                  <Button variant="outline" className="w-full">Join Group</Button>
+                  <Button variant="outline" className="w-full" onClick={() => toast({
+                    title: "Feature Coming Soon", 
+                    description: "Support groups feature is currently under development.",
+                    duration: 3000,
+                  })}>Join Group</Button>
                 </CardContent>
               </Card>
             </div>
