@@ -3,8 +3,8 @@ import React, { createContext, useContext, useState, ReactNode } from 'react';
 import { toast } from "@/components/ui/sonner";
 
 // Define the admin credentials
-const ADMIN_USERNAME = "An assessment";
-const ADMIN_PASSWORD = "Thlologelo@1";
+const ADMIN_USERNAME = "Admin123";
+const ADMIN_PASSWORD = "Admin@123";
 
 // Define the auth context type
 type AuthContextType = {
