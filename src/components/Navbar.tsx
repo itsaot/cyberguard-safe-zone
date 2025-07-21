@@ -1,11 +1,17 @@
 
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { Shield, LogIn } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 
 const Navbar = () => {
   const { isAdmin, logout } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    logout();
+    navigate('/');
+  };
 
   return (
     <header className="bg-white shadow-sm">
@@ -47,7 +53,7 @@ const Navbar = () => {
             <Button 
               variant="outline" 
               className="flex items-center gap-1 text-gray-700" 
-              onClick={logout}
+              onClick={handleLogout}
             >
               Logout
             </Button>

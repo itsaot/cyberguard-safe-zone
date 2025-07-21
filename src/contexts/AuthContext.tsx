@@ -1,6 +1,7 @@
 
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 import { toast } from "@/components/ui/sonner";
+import { useNavigate } from 'react-router-dom';
 
 // Define the admin credentials
 const ADMIN_USERNAME = "Admin123";
@@ -38,6 +39,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const logout = () => {
     setIsAdmin(false);
     toast.info("Admin logged out");
+    // Note: Navigation should be handled by the component calling logout
   };
 
   return (
