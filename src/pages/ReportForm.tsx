@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -24,6 +24,7 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { useToast } from '@/hooks/use-toast';
 import PageLayout from '@/components/PageLayout';
 import { useReports } from '@/contexts/ReportContext';
+import { useAuth } from '@/contexts/AuthContext';
 
 // Define form schema
 const reportFormSchema = z.object({
@@ -45,6 +46,19 @@ const ReportForm = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
   const { addReport } = useReports();
+  const { isAdmin } = useAuth();
+
+  // Redirect admins away from reporting
+  useEffect(() => {
+    if (isAdmin) {
+      toast({
+        title: "Access Restricted",
+        description: "Administrators cannot submit incident reports. Please use your admin dashboard to manage reports.",
+        duration: 5000,
+      });
+      navigate('/dashboard');
+    }
+  }, [isAdmin, navigate, toast]);
   
   const form = useForm<ReportFormValues>({
     resolver: zodResolver(reportFormSchema),

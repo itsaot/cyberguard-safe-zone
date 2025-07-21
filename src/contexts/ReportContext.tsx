@@ -12,16 +12,16 @@ export type Report = {
   description: string;
 };
 
-// Initial report data
+// Initial report data with South African context
 const initialReports = [
   {
     id: 1,
     type: 'Harassment',
-    platform: 'Social Media',
+    platform: 'WhatsApp',
     status: 'New',
     severity: 'high',
     date: '2025-05-05',
-    description: 'Repeated negative comments on student\'s social media posts',
+    description: 'Grade 10 learner at Johannesburg High School receiving repeated hurtful messages in class WhatsApp group. Messages included name-calling in both English and Zulu, targeting the learner\'s appearance and family background.',
   },
   {
     id: 2,
@@ -30,25 +30,25 @@ const initialReports = [
     status: 'In Progress',
     severity: 'medium',
     date: '2025-05-04',
-    description: 'Deliberate exclusion from online class group',
+    description: 'Student from Cape Town Secondary School deliberately excluded from Google Classroom group project. Other learners created a separate group without the student and shared project details on MiWay bus group chat.',
   },
   {
     id: 3,
     type: 'Threats',
-    platform: 'Text Message',
+    platform: 'Instagram',
     status: 'New',
     severity: 'high',
     date: '2025-05-04',
-    description: 'Threatening messages sent via text',
+    description: 'Grade 11 learner at Pretoria Girls High received threatening direct messages on Instagram after standing up to bullying. Threats mentioned waiting for her at Centurion Mall and knowing her taxi route home.',
   },
   {
     id: 4,
     type: 'Image Sharing',
-    platform: 'Social Media',
+    platform: 'TikTok',
     status: 'Resolved',
     severity: 'medium',
     date: '2025-05-03',
-    description: 'Sharing altered images without consent',
+    description: 'Student from Durban North College had embarrassing photos from school sports day posted on TikTok without permission. Video included mocking commentary in isiZulu and was shared in multiple Durban school WhatsApp groups.',
   },
   {
     id: 5,
@@ -57,7 +57,16 @@ const initialReports = [
     status: 'In Progress',
     severity: 'high',
     date: '2025-05-02',
-    description: 'Discriminatory language used during online gaming session',
+    description: 'Grade 9 learner from Bloemfontein High School experiencing racial slurs and discriminatory language during Fortnite gaming sessions with school peers. Comments targeted his home language (Sesotho) and made references to apartheid-era terminology.',
+  },
+  {
+    id: 6,
+    type: 'Harassment',
+    platform: 'Facebook',
+    status: 'New',
+    severity: 'medium',
+    date: '2025-05-01',
+    description: 'Grade 12 student at Port Elizabeth Technical High School being targeted in school Facebook page comments. Classmates posted negative comments about her family\'s financial situation and mocked her second-hand school uniform.',
   },
 ];
 

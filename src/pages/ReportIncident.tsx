@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { AlertTriangle, Shield, Clock, MapPin, Calendar, User, Camera, FileText } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -11,6 +11,8 @@ import { Progress } from '@/components/ui/progress';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import PageLayout from '@/components/PageLayout';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/contexts/AuthContext';
+import { useNavigate } from 'react-router-dom';
 
 const ReportIncident = () => {
   const [step, setStep] = useState(1);
@@ -30,6 +32,20 @@ const ReportIncident = () => {
     parentNotification: false
   });
   const { toast } = useToast();
+  const { isAdmin } = useAuth();
+  const navigate = useNavigate();
+
+  // Redirect admins away from reporting
+  useEffect(() => {
+    if (isAdmin) {
+      toast({
+        title: "Access Restricted",
+        description: "Administrators cannot submit incident reports. Please use your admin dashboard to manage reports.",
+        duration: 5000,
+      });
+      navigate('/dashboard');
+    }
+  }, [isAdmin, navigate, toast]);
 
   const updateFormData = (field: string, value: string | boolean) => {
     setFormData(prev => ({ ...prev, [field]: value }));

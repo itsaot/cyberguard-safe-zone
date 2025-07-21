@@ -234,7 +234,11 @@ const Dashboard = () => {
             <p className="text-gray-600">Monitor and manage cyberbullying reports</p>
           </div>
           <div className="mt-4 md:mt-0 flex gap-2">
-            <Button variant="outline" className="hidden md:flex">
+            <Button variant="outline" className="hidden md:flex" onClick={() => toast({
+              title: "Export Feature",
+              description: "Feature not available yet",
+              duration: 3000,
+            })}>
               <FileText className="mr-2 h-4 w-4" />
               Export Reports
             </Button>
@@ -407,7 +411,7 @@ const Dashboard = () => {
 
       {/* Report Details Dialog */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="sm:max-w-lg">
+        <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="text-xl">Report Details</DialogTitle>
             <DialogDescription>
@@ -417,11 +421,11 @@ const Dashboard = () => {
 
           {selectedReport ? (
             <>
-              <div className="py-4">
-                <div className="flex items-center mb-4">
+              <div className="space-y-4">
+                <div className="flex items-center flex-wrap gap-2">
                   <h3 className="text-lg font-semibold">{selectedReport.type}</h3>
                   <Badge 
-                    className={`ml-2 ${
+                    className={`${
                       selectedReport.severity === 'high' 
                         ? 'bg-red-100 text-red-800 hover:bg-red-100' 
                         : selectedReport.severity === 'medium'
@@ -433,45 +437,34 @@ const Dashboard = () => {
                   </Badge>
                 </div>
 
-                <Table>
-                  <TableBody>
-                    <TableRow>
-                      <TableCell className="font-medium flex items-center">
-                        <Tag className="mr-2 h-4 w-4" />
-                        Status
-                      </TableCell>
-                      <TableCell className="flex items-center">
-                        {getStatusIcon(selectedReport.status)}
-                        <span className="ml-2">{selectedReport.status}</span>
-                      </TableCell>
-                    </TableRow>
-                    <TableRow>
-                      <TableCell className="font-medium flex items-center">
-                        <Layers className="mr-2 h-4 w-4" />
-                        Platform
-                      </TableCell>
-                      <TableCell>{selectedReport.platform}</TableCell>
-                    </TableRow>
-                    <TableRow>
-                      <TableCell className="font-medium flex items-center">
-                        <CalendarIcon className="mr-2 h-4 w-4" />
-                        Date Reported
-                      </TableCell>
-                      <TableCell>{selectedReport.date}</TableCell>
-                    </TableRow>
-                  </TableBody>
-                </Table>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm">
+                  <div className="flex items-center gap-2">
+                    <Tag className="h-4 w-4 text-gray-500" />
+                    <span className="font-medium">Status:</span>
+                    <span>{selectedReport.status}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Layers className="h-4 w-4 text-gray-500" />
+                    <span className="font-medium">Platform:</span>
+                    <span>{selectedReport.platform}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <CalendarIcon className="h-4 w-4 text-gray-500" />
+                    <span className="font-medium">Date:</span>
+                    <span>{selectedReport.date}</span>
+                  </div>
+                </div>
 
-                <div className="mt-6">
+                <div>
                   <h4 className="font-medium mb-2">Description</h4>
-                  <div className="p-3 bg-gray-50 rounded-md">
+                  <div className="p-3 bg-gray-50 rounded-md text-sm max-h-48 overflow-y-auto">
                     {selectedReport.description}
                   </div>
                 </div>
               </div>
               
-              <DialogFooter className="sm:justify-between flex flex-col sm:flex-row gap-2">
-                <div className="flex gap-2">
+              <DialogFooter className="flex flex-col sm:flex-row gap-2 pt-4">
+                <div className="flex flex-wrap gap-2">
                   <Button 
                     variant={selectedReport.status === 'New' ? "default" : "outline"} 
                     size="sm"
@@ -497,7 +490,11 @@ const Dashboard = () => {
                     Mark Resolved
                   </Button>
                 </div>
-                <Button variant="outline" size="sm" className="ml-auto">
+                <Button variant="outline" size="sm" className="ml-auto" onClick={() => toast({
+                  title: "Export Feature",
+                  description: "Feature not available yet",
+                  duration: 3000,
+                })}>
                   <ExternalLink className="h-4 w-4 mr-2" />
                   Export Report
                 </Button>
