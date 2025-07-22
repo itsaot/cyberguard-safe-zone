@@ -13,7 +13,7 @@ import PageLayout from '@/components/PageLayout';
 import { useToast } from '@/hooks/use-toast';
 
 // Mock data for forum posts
-const forumPosts = [
+let forumPosts = [
   {
     id: 1,
     title: "Dealing with name-calling at school",
@@ -111,16 +111,91 @@ const ForumPost = ({ post, onFlag }: { post: any, onFlag: (id: number) => void }
   );
 };
 
-const CreatePostDialog = () => {
+const CreatePostDialog = ({ onPostCreated }: { onPostCreated: () => void }) => {
   const [category, setCategory] = useState('');
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const [isAdviceSeeker, setIsAdviceSeeker] = useState(false);
   const [school, setSchool] = useState('');
+  const [isOpen, setIsOpen] = useState(false);
   const { toast } = useToast();
 
+  const downloadCSV = (posts: any[]) => {
+    const csvContent = [
+      ['ID', 'Title', 'Content', 'Category', 'Author', 'Timestamp', 'IsAdviceSeeker', 'School', 'Tags'].join(','),
+      ...posts.map(post => [
+        post.id,
+        `"${post.title.replace(/"/g, '""')}"`,
+        `"${post.content.replace(/"/g, '""')}"`,
+        `"${post.category}"`,
+        `"${post.author}"`,
+        `"${post.timestamp}"`,
+        post.isAdviceSeeker,
+        `"${post.school}"`,
+        `"${post.tags.join('; ')}"`
+      ].join(','))
+    ].join('\n');
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    link.setAttribute('href', url);
+    link.setAttribute('download', `forum_posts_${new Date().toISOString().split('T')[0]}.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const handlePostSubmit = () => {
+    if (!category || !title || !content) {
+      toast({
+        title: "Missing Information",
+        description: "Please fill in all required fields.",
+        duration: 3000,
+      });
+      return;
+    }
+
+    const newPost = {
+      id: Math.max(...forumPosts.map(p => p.id)) + 1,
+      title,
+      content,
+      category: category === 'physical' ? 'Physical Bullying' : 
+                category === 'verbal' ? 'Verbal Bullying' : 'Cyberbullying',
+      author: "Anonymous User",
+      timestamp: "Just now",
+      isAdviceSeeker,
+      school: school || "Unknown",
+      tags: [
+        ...(isAdviceSeeker ? ['advice-needed'] : []),
+        category,
+        ...(school ? ['school'] : [])
+      ]
+    };
+
+    forumPosts.unshift(newPost);
+    downloadCSV(forumPosts);
+    
+    // Reset form
+    setCategory('');
+    setTitle('');
+    setContent('');
+    setIsAdviceSeeker(false);
+    setSchool('');
+    setIsOpen(false);
+    
+    onPostCreated();
+    
+    toast({
+      title: "Post Created Successfully",
+      description: "Your anonymous post has been added to the forum and saved to CSV.",
+      duration: 3000,
+    });
+  };
+
   return (
-    <Dialog>
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
         <Button className="mb-6">
           <Plus className="h-4 w-4 mr-2" />
@@ -133,7 +208,7 @@ const CreatePostDialog = () => {
         </DialogHeader>
         <div className="space-y-4">
           <div>
-            <Label htmlFor="category">Category</Label>
+            <Label htmlFor="category">Category *</Label>
             <Select value={category} onValueChange={setCategory}>
               <SelectTrigger>
                 <SelectValue placeholder="Select category" />
@@ -147,7 +222,7 @@ const CreatePostDialog = () => {
           </div>
           
           <div>
-            <Label htmlFor="title">Title</Label>
+            <Label htmlFor="title">Title *</Label>
             <Input
               id="title"
               value={title}
@@ -157,7 +232,7 @@ const CreatePostDialog = () => {
           </div>
           
           <div>
-            <Label htmlFor="content">Your Story</Label>
+            <Label htmlFor="content">Your Story *</Label>
             <Textarea
               id="content"
               value={content}
@@ -187,11 +262,9 @@ const CreatePostDialog = () => {
             <Label htmlFor="advice">I'm seeking advice and support</Label>
           </div>
           
-          <Button className="w-full" onClick={() => toast({
-            title: "Feature Coming Soon",
-            description: "Anonymous posting feature is currently under development.",
-            duration: 3000,
-          })}>Post Anonymously</Button>
+          <Button className="w-full" onClick={handlePostSubmit}>
+            Post Anonymously
+          </Button>
         </div>
       </DialogContent>
     </Dialog>
@@ -202,7 +275,12 @@ const Forum = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('all');
   const [sortBy, setSortBy] = useState('recent');
+  const [posts, setPosts] = useState(forumPosts);
   const { toast } = useToast();
+
+  const handlePostCreated = () => {
+    setPosts([...forumPosts]);
+  };
 
   const handleFlag = (postId: number) => {
     toast({
@@ -212,7 +290,7 @@ const Forum = () => {
     });
   };
 
-  const filteredPosts = forumPosts.filter(post => {
+  const filteredPosts = posts.filter(post => {
     const matchesSearch = post.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          post.content.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesCategory = categoryFilter === 'all' || 
@@ -275,7 +353,7 @@ const Forum = () => {
               </Select>
             </div>
 
-            <CreatePostDialog />
+            <CreatePostDialog onPostCreated={handlePostCreated} />
 
             <div className="space-y-4">
               {filteredPosts.map(post => (
