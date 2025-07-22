@@ -22,15 +22,32 @@ export interface CreatePostData {
 
 // Get all posts
 export const getPosts = async (): Promise<ForumPost[]> => {
-  const response = await fetch(`${BASE_URL}/api/posts`);
-  if (!response.ok) {
-    throw new Error('Failed to fetch posts');
+  console.log('Fetching posts from:', `${BASE_URL}/api/posts`);
+  
+  try {
+    const response = await fetch(`${BASE_URL}/api/posts`);
+    console.log('GET posts response status:', response.status);
+    
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('GET posts error:', errorText);
+      throw new Error(`Failed to fetch posts: ${response.status} ${errorText}`);
+    }
+    
+    const data = await response.json();
+    console.log('Fetched posts:', data);
+    return data;
+  } catch (error) {
+    console.error('Network error fetching posts:', error);
+    throw error;
   }
-  return response.json();
 };
 
 // Create new post (anonymous)
 export const createPost = async (postData: CreatePostData): Promise<ForumPost> => {
+  console.log('Creating post with data:', postData);
+  console.log('Sending to URL:', `${BASE_URL}/api/posts`);
+  
   const response = await fetch(`${BASE_URL}/api/posts`, {
     method: 'POST',
     headers: {
@@ -38,8 +55,14 @@ export const createPost = async (postData: CreatePostData): Promise<ForumPost> =
     },
     body: JSON.stringify(postData),
   });
+  
+  console.log('Response status:', response.status);
+  console.log('Response headers:', response.headers);
+  
   if (!response.ok) {
-    throw new Error('Failed to create post');
+    const errorText = await response.text();
+    console.error('Error response:', errorText);
+    throw new Error(`Failed to create post: ${response.status} ${errorText}`);
   }
   return response.json();
 };
