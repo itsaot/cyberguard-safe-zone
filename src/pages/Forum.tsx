@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Search, Filter, MessageSquare, Heart, Flag, Plus, Calendar, MapPin, Tag } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -11,43 +11,9 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import PageLayout from '@/components/PageLayout';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/contexts/AuthContext';
+import { getPosts, createPost, flagPost, type ForumPost as ApiForumPost, CreatePostData } from '@/services/api';
 
-// Mock data for forum posts
-let forumPosts = [
-  {
-    id: 1,
-    title: "Dealing with name-calling at school",
-    content: "I've been experiencing verbal bullying in my classes. Students keep making fun of my appearance and it's affecting my confidence...",
-    category: "Verbal Bullying",
-    author: "Anonymous User",
-    timestamp: "2 hours ago",
-    isAdviceSeeker: true,
-    school: "Central High School",
-    tags: ["advice-needed", "school", "self-esteem"]
-  },
-  {
-    id: 2,
-    title: "Someone is spreading rumors about me online",
-    content: "There are false stories being shared on social media about me. I don't know how to handle this situation...",
-    category: "Cyberbullying",
-    author: "Anonymous User",
-    timestamp: "5 hours ago",
-    isAdviceSeeker: true,
-    school: "West Side Academy",
-    tags: ["cyberbullying", "social-media", "rumors"]
-  },
-  {
-    id: 3,
-    title: "Physical intimidation in hallways",
-    content: "A group of students has been pushing me around between classes. I'm scared to walk alone in the hallways...",
-    category: "Physical Bullying",
-    author: "Anonymous User",
-    timestamp: "1 day ago",
-    isAdviceSeeker: true,
-    school: "North Valley School",
-    tags: ["physical", "safety", "urgent"]
-  }
-];
 
 const ForumPost = ({ post, onFlag }: { post: any, onFlag: (id: number) => void }) => {
   const { toast } = useToast();
@@ -115,39 +81,11 @@ const CreatePostDialog = ({ onPostCreated }: { onPostCreated: () => void }) => {
   const [category, setCategory] = useState('');
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
-  const [isAdviceSeeker, setIsAdviceSeeker] = useState(false);
-  const [school, setSchool] = useState('');
   const [isOpen, setIsOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
 
-  const downloadCSV = (posts: any[]) => {
-    const csvContent = [
-      ['ID', 'Title', 'Content', 'Category', 'Author', 'Timestamp', 'IsAdviceSeeker', 'School', 'Tags'].join(','),
-      ...posts.map(post => [
-        post.id,
-        `"${post.title.replace(/"/g, '""')}"`,
-        `"${post.content.replace(/"/g, '""')}"`,
-        `"${post.category}"`,
-        `"${post.author}"`,
-        `"${post.timestamp}"`,
-        post.isAdviceSeeker,
-        `"${post.school}"`,
-        `"${post.tags.join('; ')}"`
-      ].join(','))
-    ].join('\n');
-
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement('a');
-    const url = URL.createObjectURL(blob);
-    link.setAttribute('href', url);
-    link.setAttribute('download', `forum_posts_${new Date().toISOString().split('T')[0]}.csv`);
-    link.style.visibility = 'hidden';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  };
-
-  const handlePostSubmit = () => {
+  const handlePostSubmit = async () => {
     if (!category || !title || !content) {
       toast({
         title: "Missing Information",
@@ -157,41 +95,40 @@ const CreatePostDialog = ({ onPostCreated }: { onPostCreated: () => void }) => {
       return;
     }
 
-    const newPost = {
-      id: Math.max(...forumPosts.map(p => p.id)) + 1,
-      title,
-      content,
-      category: category === 'physical' ? 'Physical Bullying' : 
-                category === 'verbal' ? 'Verbal Bullying' : 'Cyberbullying',
-      author: "Anonymous User",
-      timestamp: "Just now",
-      isAdviceSeeker,
-      school: school || "Unknown",
-      tags: [
-        ...(isAdviceSeeker ? ['advice-needed'] : []),
+    setIsSubmitting(true);
+    
+    try {
+      const postData: CreatePostData = {
+        title,
+        content,
         category,
-        ...(school ? ['school'] : [])
-      ]
-    };
+        tags: [category]
+      };
 
-    forumPosts.unshift(newPost);
-    downloadCSV(forumPosts);
-    
-    // Reset form
-    setCategory('');
-    setTitle('');
-    setContent('');
-    setIsAdviceSeeker(false);
-    setSchool('');
-    setIsOpen(false);
-    
-    onPostCreated();
-    
-    toast({
-      title: "Post Created Successfully",
-      description: "Your anonymous post has been added to the forum and saved to CSV.",
-      duration: 3000,
-    });
+      await createPost(postData);
+      
+      // Reset form
+      setCategory('');
+      setTitle('');
+      setContent('');
+      setIsOpen(false);
+      
+      onPostCreated();
+      
+      toast({
+        title: "Post Created Successfully",
+        description: "Your anonymous post has been added to the forum.",
+        duration: 3000,
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to create post. Please try again.",
+        duration: 3000,
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -242,28 +179,12 @@ const CreatePostDialog = ({ onPostCreated }: { onPostCreated: () => void }) => {
             />
           </div>
           
-          <div>
-            <Label htmlFor="school">School/Location (Optional)</Label>
-            <Input
-              id="school"
-              value={school}
-              onChange={(e) => setSchool(e.target.value)}
-              placeholder="Your school or general area"
-            />
-          </div>
-          
-          <div className="flex items-center space-x-2">
-            <input
-              type="checkbox"
-              id="advice"
-              checked={isAdviceSeeker}
-              onChange={(e) => setIsAdviceSeeker(e.target.checked)}
-            />
-            <Label htmlFor="advice">I'm seeking advice and support</Label>
-          </div>
-          
-          <Button className="w-full" onClick={handlePostSubmit}>
-            Post Anonymously
+          <Button 
+            className="w-full" 
+            onClick={handlePostSubmit}
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? 'Posting...' : 'Post Anonymously'}
           </Button>
         </div>
       </DialogContent>
@@ -275,19 +196,60 @@ const Forum = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('all');
   const [sortBy, setSortBy] = useState('recent');
-  const [posts, setPosts] = useState(forumPosts);
+  const [posts, setPosts] = useState<ApiForumPost[]>([]);
+  const [loading, setLoading] = useState(true);
   const { toast } = useToast();
+  const { isAdmin } = useAuth();
 
-  const handlePostCreated = () => {
-    setPosts([...forumPosts]);
+  const fetchPosts = async () => {
+    try {
+      setLoading(true);
+      const fetchedPosts = await getPosts();
+      setPosts(fetchedPosts);
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to load posts. Please try again.",
+        duration: 3000,
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleFlag = (postId: number) => {
-    toast({
-      title: "Feature Coming Soon",
-      description: "Post flagging feature is currently under development.",
-      duration: 3000,
-    });
+  useEffect(() => {
+    fetchPosts();
+  }, []);
+
+  const handlePostCreated = () => {
+    fetchPosts(); // Refresh posts after creating a new one
+  };
+
+  const handleFlag = async (postId: number) => {
+    if (!isAdmin) {
+      toast({
+        title: "Access Denied",
+        description: "Only administrators can flag posts.",
+        duration: 3000,
+      });
+      return;
+    }
+
+    try {
+      await flagPost(postId);
+      toast({
+        title: "Post Flagged",
+        description: "The post has been flagged for review.",
+        duration: 3000,
+      });
+      fetchPosts(); // Refresh posts
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to flag post. Please try again.",
+        duration: 3000,
+      });
+    }
   };
 
   const filteredPosts = posts.filter(post => {
@@ -364,7 +326,7 @@ const Forum = () => {
 
           <TabsContent value="advice" className="mt-6">
             <div className="space-y-4">
-              {filteredPosts.filter(post => post.isAdviceSeeker).map(post => (
+              {filteredPosts.filter(post => post.isAdviceSeeker === true).map(post => (
                 <ForumPost key={post.id} post={post} onFlag={handleFlag} />
               ))}
             </div>
