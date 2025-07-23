@@ -14,11 +14,11 @@ export interface ForumPost {
 }
 
 export interface CreatePostData {
-  title: string;
+  type: "physical" | "verbal" | "cyber";
   content: string;
-  category: string;
-  tags: string[];
-  type: string;
+  category?: string;
+  tags?: string[];
+  isAnonymous: boolean;
 }
 
 // Get all posts

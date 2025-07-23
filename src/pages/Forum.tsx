@@ -78,18 +78,17 @@ const ForumPost = ({ post, onFlag }: { post: any, onFlag: (id: number) => void }
 };
 
 const CreatePostDialog = ({ onPostCreated }: { onPostCreated: () => void }) => {
-  const [category, setCategory] = useState('');
-  const [title, setTitle] = useState('');
+  const [type, setType] = useState<"physical" | "verbal" | "cyber">("cyber");
   const [content, setContent] = useState('');
   const [isOpen, setIsOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
 
   const handlePostSubmit = async () => {
-    if (!category || !title || !content) {
+    if (!content.trim()) {
       toast({
         title: "Missing Information",
-        description: "Please fill in all required fields.",
+        description: "Please enter your post content.",
         duration: 3000,
       });
       return;
@@ -99,18 +98,15 @@ const CreatePostDialog = ({ onPostCreated }: { onPostCreated: () => void }) => {
     
     try {
       const postData: CreatePostData = {
-        title,
+        type,
         content,
-        category,
-        tags: [category],
-        type: "anonymous"
+        isAnonymous: true
       };
 
       await createPost(postData);
       
       // Reset form
-      setCategory('');
-      setTitle('');
+      setType("cyber");
       setContent('');
       setIsOpen(false);
       
@@ -146,10 +142,10 @@ const CreatePostDialog = ({ onPostCreated }: { onPostCreated: () => void }) => {
         </DialogHeader>
         <div className="space-y-4">
           <div>
-            <Label htmlFor="category">Category *</Label>
-            <Select value={category} onValueChange={setCategory}>
+            <Label htmlFor="type">Type of Incident *</Label>
+            <Select value={type} onValueChange={(value: "physical" | "verbal" | "cyber") => setType(value)}>
               <SelectTrigger>
-                <SelectValue placeholder="Select category" />
+                <SelectValue placeholder="Select incident type" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="physical">Physical Bullying</SelectItem>
@@ -160,22 +156,12 @@ const CreatePostDialog = ({ onPostCreated }: { onPostCreated: () => void }) => {
           </div>
           
           <div>
-            <Label htmlFor="title">Title *</Label>
-            <Input
-              id="title"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              placeholder="Brief description of your situation"
-            />
-          </div>
-          
-          <div>
-            <Label htmlFor="content">Your Story *</Label>
+            <Label htmlFor="content">Content *</Label>
             <Textarea
               id="content"
               value={content}
               onChange={(e) => setContent(e.target.value)}
-              placeholder="Share your experience. Remember, you're posting anonymously."
+              placeholder="Describe what happened..."
               rows={4}
             />
           </div>
