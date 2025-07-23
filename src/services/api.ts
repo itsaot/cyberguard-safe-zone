@@ -18,6 +18,7 @@ export interface CreatePostData {
   content: string;
   category: string;
   tags: string[];
+  type: string;
 }
 
 // Get all posts

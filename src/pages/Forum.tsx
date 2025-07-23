@@ -102,7 +102,8 @@ const CreatePostDialog = ({ onPostCreated }: { onPostCreated: () => void }) => {
         title,
         content,
         category,
-        tags: [category]
+        tags: [category],
+        type: "anonymous"
       };
 
       await createPost(postData);
