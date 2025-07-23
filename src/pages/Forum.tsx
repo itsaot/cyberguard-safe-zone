@@ -23,30 +23,42 @@ const ForumPost = ({ post, onFlag }: { post: any, onFlag: (id: number) => void }
       <CardHeader>
         <div className="flex justify-between items-start">
           <div className="flex-1">
-            <CardTitle className="text-lg mb-2">{post.title}</CardTitle>
+            <CardTitle className="text-lg mb-2">{post.title || "Untitled Post"}</CardTitle>
             <div className="flex items-center gap-2 mb-2">
               <Badge variant={
-                post.category === 'Physical Bullying' ? 'destructive' :
-                post.category === 'Verbal Bullying' ? 'secondary' : 'default'
+                (post.type || post.category) === 'physical' ? 'destructive' :
+                (post.type || post.category) === 'verbal' ? 'secondary' : 'default'
               }>
-                {post.category}
+                {post.type ? (
+                  post.type === 'physical' ? 'Physical Bullying' :
+                  post.type === 'verbal' ? 'Verbal Bullying' : 'Cyberbullying'
+                ) : (post.category || 'General')}
               </Badge>
               {post.isAdviceSeeker && (
                 <Badge variant="outline" className="bg-blue-50 text-blue-700">
                   Seeking Advice
                 </Badge>
               )}
+              {post.isAnonymous && (
+                <Badge variant="outline">
+                  Anonymous
+                </Badge>
+              )}
             </div>
             <div className="flex items-center gap-4 text-sm text-muted-foreground">
-              <span>{post.author}</span>
-              <span className="flex items-center gap-1">
-                <Calendar className="h-3 w-3" />
-                {post.timestamp}
-              </span>
-              <span className="flex items-center gap-1">
-                <MapPin className="h-3 w-3" />
-                {post.school}
-              </span>
+              <span>{post.author || "Anonymous"}</span>
+              {post.timestamp && (
+                <span className="flex items-center gap-1">
+                  <Calendar className="h-3 w-3" />
+                  {post.timestamp}
+                </span>
+              )}
+              {post.school && (
+                <span className="flex items-center gap-1">
+                  <MapPin className="h-3 w-3" />
+                  {post.school}
+                </span>
+              )}
             </div>
           </div>
           <Button
@@ -60,16 +72,18 @@ const ForumPost = ({ post, onFlag }: { post: any, onFlag: (id: number) => void }
         </div>
       </CardHeader>
       <CardContent>
-        <p className="text-gray-700 mb-4">{post.content}</p>
+        <p className="text-gray-700 mb-4">{post.content || "No content available"}</p>
         
-        <div className="flex flex-wrap gap-1 mb-4">
-          {post.tags.map((tag: string) => (
-            <Badge key={tag} variant="outline" className="text-xs">
-              <Tag className="h-3 w-3 mr-1" />
-              {tag}
-            </Badge>
-          ))}
-        </div>
+        {post.tags && post.tags.length > 0 && (
+          <div className="flex flex-wrap gap-1 mb-4">
+            {post.tags.map((tag: string, index: number) => (
+              <Badge key={`${tag}-${index}`} variant="outline" className="text-xs">
+                <Tag className="h-3 w-3 mr-1" />
+                {tag}
+              </Badge>
+            ))}
+          </div>
+        )}
         
         {/* Removed likes and comments section as requested */}
       </CardContent>
@@ -105,22 +119,26 @@ const CreatePostDialog = ({ onPostCreated }: { onPostCreated: () => void }) => {
 
       await createPost(postData);
       
-      // Reset form
-      setType("cyber");
-      setContent('');
-      setIsOpen(false);
-      
-      onPostCreated();
-      
       toast({
         title: "Post Created Successfully",
         description: "Your anonymous post has been added to the forum.",
         duration: 3000,
       });
+      
+      // Reset form
+      setType("cyber");
+      setContent('');
+      setIsOpen(false);
+      
+      // Refresh posts to show the new post
+      await onPostCreated();
+      
     } catch (error) {
+      console.error('Error creating post:', error);
       toast({
         title: "Error",
         description: "Failed to create post. Please try again.",
+        variant: "destructive",
         duration: 3000,
       });
     } finally {
@@ -192,13 +210,16 @@ const Forum = () => {
     try {
       setLoading(true);
       const fetchedPosts = await getPosts();
-      setPosts(fetchedPosts);
+      setPosts(fetchedPosts || []);
     } catch (error) {
+      console.error('Error fetching posts:', error);
       toast({
         title: "Error",
         description: "Failed to load posts. Please try again.",
+        variant: "destructive",
         duration: 3000,
       });
+      setPosts([]); // Set empty array on error to prevent blank UI
     } finally {
       setLoading(false);
     }
@@ -208,8 +229,8 @@ const Forum = () => {
     fetchPosts();
   }, []);
 
-  const handlePostCreated = () => {
-    fetchPosts(); // Refresh posts after creating a new one
+  const handlePostCreated = async () => {
+    await fetchPosts(); // Refresh posts after creating a new one
   };
 
   const handleFlag = async (postId: number) => {
@@ -240,10 +261,10 @@ const Forum = () => {
   };
 
   const filteredPosts = posts.filter(post => {
-    const matchesSearch = post.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         post.content.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesSearch = (post.title ?? "").toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         (post.content ?? "").toLowerCase().includes(searchTerm.toLowerCase());
     const matchesCategory = categoryFilter === 'all' || 
-                           post.category.toLowerCase().includes(categoryFilter.toLowerCase());
+                           (post.category ?? "").toLowerCase().includes(categoryFilter.toLowerCase());
     return matchesSearch && matchesCategory;
   });
 
@@ -305,9 +326,17 @@ const Forum = () => {
             <CreatePostDialog onPostCreated={handlePostCreated} />
 
             <div className="space-y-4">
-              {filteredPosts.map(post => (
-                <ForumPost key={post.id} post={post} onFlag={handleFlag} />
-              ))}
+              {loading ? (
+                <div className="text-center py-8">Loading posts...</div>
+              ) : filteredPosts.length > 0 ? (
+                filteredPosts.map(post => (
+                  <ForumPost key={post.id} post={post} onFlag={handleFlag} />
+                ))
+              ) : (
+                <div className="text-center py-8 text-gray-500">
+                  No posts found. Be the first to share your experience!
+                </div>
+              )}
             </div>
           </TabsContent>
 
