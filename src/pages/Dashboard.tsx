@@ -259,7 +259,7 @@ const Dashboard = () => {
     id: parseInt(report.id) || 0,
     type: report.title,
     platform: 'Backend Report',
-    severity: report.urgency,
+    severity: report.type || 'Medium',
     date: report.createdAt ? new Date(report.createdAt).toLocaleDateString() : new Date().toLocaleDateString(),
     description: report.description,
     status: report.status || 'New'

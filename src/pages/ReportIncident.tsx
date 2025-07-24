@@ -13,6 +13,7 @@ import PageLayout from '@/components/PageLayout';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import { createReport } from '@/services/api';
 
 const ReportIncident = () => {
   const [step, setStep] = useState(1);
@@ -59,30 +60,63 @@ const ReportIncident = () => {
     if (step > 1) setStep(step - 1);
   };
 
-  const handleSubmit = () => {
-    toast({
-      title: "Report Submitted Successfully",
-      description: "Your incident report has been received. Reference ID: #RPT-2024-001",
-      duration: 5000,
-    });
-    
-    // Reset form
-    setFormData({
-      incidentType: '',
-      severity: '',
-      description: '',
-      location: '',
-      date: '',
-      time: '',
-      witnesses: '',
-      evidence: '',
-      reporterType: 'victim',
-      anonymous: true,
-      contactInfo: '',
-      schoolNotification: false,
-      parentNotification: false
-    });
-    setStep(1);
+  const handleSubmit = async () => {
+    if (!formData.incidentType || !formData.description) {
+      toast({
+        title: "Missing Information",
+        description: "Please fill in all required fields.",
+        variant: "destructive",
+        duration: 3000,
+      });
+      return;
+    }
+
+    try {
+      const reportData = {
+        title: `${formData.incidentType} Incident Report`,
+        description: formData.description,
+        type: formData.incidentType as "phishing" | "malware" | "scam" | "other",
+        userId: "anonymous_user" // You can replace this with actual user ID when available
+      };
+
+      await createReport(reportData);
+      
+      toast({
+        title: "Report Submitted Successfully",
+        description: "Your incident report has been received and will be reviewed.",
+        duration: 5000,
+      });
+      
+      // Reset form
+      setFormData({
+        incidentType: '',
+        severity: '',
+        description: '',
+        location: '',
+        date: '',
+        time: '',
+        witnesses: '',
+        evidence: '',
+        reporterType: 'victim',
+        anonymous: true,
+        contactInfo: '',
+        schoolNotification: false,
+        parentNotification: false
+      });
+      setStep(1);
+      
+      // Redirect to success page
+      navigate('/dashboard');
+      
+    } catch (error) {
+      console.error('Error creating report:', error);
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to submit report. Please try again.",
+        variant: "destructive",
+        duration: 3000,
+      });
+    }
   };
 
   const getProgressPercentage = () => (step / 4) * 100;
@@ -142,11 +176,9 @@ const ReportIncident = () => {
                       <SelectValue placeholder="Select incident type" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="physical">Physical Bullying</SelectItem>
-                      <SelectItem value="verbal">Verbal Bullying/Harassment</SelectItem>
-                      <SelectItem value="cyber">Cyberbullying</SelectItem>
-                      <SelectItem value="social">Social Exclusion</SelectItem>
-                      <SelectItem value="discrimination">Discrimination</SelectItem>
+                      <SelectItem value="phishing">Phishing</SelectItem>
+                      <SelectItem value="malware">Malware</SelectItem>
+                      <SelectItem value="scam">Scam</SelectItem>
                       <SelectItem value="other">Other</SelectItem>
                     </SelectContent>
                   </Select>

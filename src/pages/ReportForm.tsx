@@ -86,8 +86,8 @@ const ReportForm = () => {
       const reportData: CreateReportData = {
         title: data.title,
         description: data.description,
-        location: data.location,
-        urgency: data.urgency,
+        type: data.urgency === 'high' ? 'malware' : data.urgency === 'medium' ? 'phishing' : 'scam',
+        userId: "anonymous_user" // You can replace this with actual user ID when available
       };
 
       // Submit to backend
