@@ -34,6 +34,7 @@ import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 import PageLayout from '@/components/PageLayout';
 import { useToast } from '@/hooks/use-toast';
 import { useReports } from '@/contexts/ReportContext';
+import { getReports, type IncidentReport } from '@/services/api';
 import { 
   Dialog,
   DialogContent,
@@ -179,10 +180,43 @@ const Dashboard = () => {
   const [periodFilter, setPeriodFilter] = useState('30days');
   const [selectedReportId, setSelectedReportId] = useState<number | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [backendReports, setBackendReports] = useState<IncidentReport[]>([]);
+  const [loading, setLoading] = useState(true);
   const { toast } = useToast();
   const { reports, getReportById, updateReportStatus } = useReports();
 
   const selectedReport = selectedReportId ? getReportById(selectedReportId) : null;
+
+  // Fetch reports from backend
+  const fetchBackendReports = async () => {
+    try {
+      setLoading(true);
+      const fetchedReports = await getReports();
+      setBackendReports(fetchedReports || []);
+      console.log('Fetched backend reports:', fetchedReports);
+    } catch (error) {
+      console.error('Error fetching backend reports:', error);
+      toast({
+        title: "Error",
+        description: "Failed to load reports from backend. Please check authentication.",
+        variant: "destructive",
+        duration: 3000,
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Real-time sync with polling every 10 seconds
+  useEffect(() => {
+    fetchBackendReports();
+    
+    const interval = setInterval(() => {
+      fetchBackendReports();
+    }, 10000); // Poll every 10 seconds
+
+    return () => clearInterval(interval);
+  }, []);
 
   // Get chart data based on selected period
   const getChartData = () => {
@@ -220,10 +254,21 @@ const Dashboard = () => {
     }
   };
 
+  // Combine local context reports with backend reports
+  const allReports = [...reports, ...backendReports.map(report => ({
+    id: parseInt(report.id) || 0,
+    type: report.title,
+    platform: 'Backend Report',
+    severity: report.type || 'Medium',
+    date: report.createdAt ? new Date(report.createdAt).toLocaleDateString() : new Date().toLocaleDateString(),
+    description: report.description,
+    status: report.status || 'New'
+  }))];
+
   // Filter reports based on selected filter
   const filteredReports = filter === 'all' 
-    ? reports 
-    : reports.filter(report => report.status.toLowerCase() === filter);
+    ? allReports 
+    : allReports.filter(report => (report.status?.toLowerCase() || 'new') === filter);
 
   return (
     <PageLayout>
@@ -252,21 +297,21 @@ const Dashboard = () => {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           <StatsCard 
             title="Total Reports" 
-            value={reports.length.toString()} 
+            value={allReports.length.toString()} 
             icon={<FileText className="h-6 w-6" />} 
-            description="All time"
+            description={`${backendReports.length} from backend, ${reports.length} local`}
           />
           <StatsCard 
             title="Pending Review" 
-            value={reports.filter(r => r.status === 'New').length.toString()}
+            value={allReports.filter(r => (r.status || 'New') === 'New').length.toString()}
             icon={<Clock className="h-6 w-6" />}
             description="Requires attention"
           />
           <StatsCard 
             title="Resolved" 
-            value={reports.filter(r => r.status === 'Resolved').length.toString()}
+            value={allReports.filter(r => (r.status || 'New') === 'Resolved').length.toString()}
             icon={<CheckCircle className="h-6 w-6" />}
-            description={`${Math.round((reports.filter(r => r.status === 'Resolved').length / reports.length) * 100)}% resolution rate`}
+            description={`${allReports.length > 0 ? Math.round((allReports.filter(r => (r.status || 'New') === 'Resolved').length / allReports.length) * 100) : 0}% resolution rate`}
           />
         </div>
         
@@ -378,11 +423,15 @@ const Dashboard = () => {
               </TabsList>
               <TabsContent value="list" className="mt-4">
                 <div className="rounded-md border">
-                  {filteredReports.length > 0 ? (
+                  {loading ? (
+                    <div className="py-12 text-center">
+                      <p className="text-gray-600">Loading reports...</p>
+                    </div>
+                  ) : filteredReports.length > 0 ? (
                     <div className="divide-y">
                       {filteredReports.map((report) => (
                         <ReportRow 
-                          key={report.id} 
+                          key={`${report.id}-${report.platform}`} 
                           report={report} 
                           onViewDetails={handleViewDetails}
                         />

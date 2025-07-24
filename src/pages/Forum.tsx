@@ -92,17 +92,17 @@ const ForumPost = ({ post, onFlag }: { post: any, onFlag: (id: number) => void }
 };
 
 const CreatePostDialog = ({ onPostCreated }: { onPostCreated: () => void }) => {
-  const [type, setType] = useState<"physical" | "verbal" | "cyber">("cyber");
+  const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const [isOpen, setIsOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
 
   const handlePostSubmit = async () => {
-    if (!content.trim()) {
+    if (!title.trim() || !content.trim()) {
       toast({
         title: "Missing Information",
-        description: "Please enter your post content.",
+        description: "Please enter both title and content for your post.",
         duration: 3000,
       });
       return;
@@ -112,21 +112,21 @@ const CreatePostDialog = ({ onPostCreated }: { onPostCreated: () => void }) => {
     
     try {
       const postData: CreatePostData = {
-        type,
+        title,
         content,
-        isAnonymous: true
+        userId: "anonymous_user" // You can replace this with actual user ID when available
       };
 
       await createPost(postData);
       
       toast({
         title: "Post Created Successfully",
-        description: "Your anonymous post has been added to the forum.",
+        description: "Your post has been added to the forum.",
         duration: 3000,
       });
       
       // Reset form
-      setType("cyber");
+      setTitle('');
       setContent('');
       setIsOpen(false);
       
@@ -137,7 +137,7 @@ const CreatePostDialog = ({ onPostCreated }: { onPostCreated: () => void }) => {
       console.error('Error creating post:', error);
       toast({
         title: "Error",
-        description: "Failed to create post. Please try again.",
+        description: error instanceof Error ? error.message : "Failed to create post. Please try again.",
         variant: "destructive",
         duration: 3000,
       });
@@ -156,21 +156,17 @@ const CreatePostDialog = ({ onPostCreated }: { onPostCreated: () => void }) => {
       </DialogTrigger>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Create Anonymous Post</DialogTitle>
+          <DialogTitle>Create Post</DialogTitle>
         </DialogHeader>
         <div className="space-y-4">
           <div>
-            <Label htmlFor="type">Type of Incident *</Label>
-            <Select value={type} onValueChange={(value: "physical" | "verbal" | "cyber") => setType(value)}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select incident type" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="physical">Physical Bullying</SelectItem>
-                <SelectItem value="verbal">Verbal Bullying</SelectItem>
-                <SelectItem value="cyber">Cyberbullying</SelectItem>
-              </SelectContent>
-            </Select>
+            <Label htmlFor="title">Title *</Label>
+            <Input
+              id="title"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              placeholder="Enter post title..."
+            />
           </div>
           
           <div>
@@ -179,7 +175,7 @@ const CreatePostDialog = ({ onPostCreated }: { onPostCreated: () => void }) => {
               id="content"
               value={content}
               onChange={(e) => setContent(e.target.value)}
-              placeholder="Describe what happened..."
+              placeholder="Share your thoughts or experience..."
               rows={4}
             />
           </div>
@@ -189,7 +185,7 @@ const CreatePostDialog = ({ onPostCreated }: { onPostCreated: () => void }) => {
             onClick={handlePostSubmit}
             disabled={isSubmitting}
           >
-            {isSubmitting ? 'Posting...' : 'Post Anonymously'}
+            {isSubmitting ? 'Posting...' : 'Create Post'}
           </Button>
         </div>
       </DialogContent>
@@ -227,7 +223,16 @@ const Forum = () => {
 
   useEffect(() => {
     fetchPosts();
-  }, []);
+    
+    // Real-time sync with polling every 10 seconds for admin users
+    if (isAdmin) {
+      const interval = setInterval(() => {
+        fetchPosts();
+      }, 10000); // Poll every 10 seconds for admins
+
+      return () => clearInterval(interval);
+    }
+  }, [isAdmin]);
 
   const handlePostCreated = async () => {
     await fetchPosts(); // Refresh posts after creating a new one
