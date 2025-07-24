@@ -11,8 +11,6 @@ import { Progress } from '@/components/ui/progress';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import PageLayout from '@/components/PageLayout';
 import { useToast } from '@/hooks/use-toast';
-import { getReports, type IncidentReport } from '@/services/api';
-import { useEffect } from 'react';
 
 // Mock data for moderator dashboard
 const flaggedPosts = [
@@ -94,40 +92,7 @@ const ModeratorDashboard = () => {
   const [activeTab, setActiveTab] = useState('overview');
   const [searchTerm, setSearchTerm] = useState('');
   const [filterPriority, setFilterPriority] = useState('all');
-  const [backendReports, setBackendReports] = useState<IncidentReport[]>([]);
-  const [loading, setLoading] = useState(true);
   const { toast } = useToast();
-
-  // Fetch backend reports
-  const fetchBackendReports = async () => {
-    try {
-      setLoading(true);
-      const fetchedReports = await getReports();
-      setBackendReports(fetchedReports || []);
-      console.log('Moderator: Fetched backend reports:', fetchedReports);
-    } catch (error) {
-      console.error('Moderator: Error fetching backend reports:', error);
-      toast({
-        title: "Error",
-        description: "Failed to load incident reports from backend.",
-        variant: "destructive",
-        duration: 3000,
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Real-time sync with polling
-  useEffect(() => {
-    fetchBackendReports();
-    
-    const interval = setInterval(() => {
-      fetchBackendReports();
-    }, 10000); // Poll every 10 seconds
-
-    return () => clearInterval(interval);
-  }, []);
 
   const handleFlagAction = (flagId: number, action: string) => {
     toast({
@@ -371,104 +336,55 @@ const ModeratorDashboard = () => {
 
             <Card>
               <CardContent className="p-0">
-                {loading ? (
-                  <div className="p-8 text-center">
-                    <p className="text-gray-600">Loading reports...</p>
-                  </div>
-                ) : (
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Report ID</TableHead>
-                        <TableHead>Title</TableHead>
-                        <TableHead>Urgency</TableHead>
-                        <TableHead>Status</TableHead>
-                        <TableHead>Location</TableHead>
-                        <TableHead>Created</TableHead>
-                        <TableHead>Actions</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {/* Backend reports */}
-                      {backendReports.map(report => (
-                        <TableRow key={`backend-${report.id}`}>
-                          <TableCell className="font-medium">{report.id}</TableCell>
-                          <TableCell>{report.title}</TableCell>
-                          <TableCell>
-                            <Badge className={getPriorityColor('Medium')}>
-                              {report.type || 'Medium'}
-                            </Badge>
-                          </TableCell>
-                          <TableCell>
-                            <Badge className={getStatusColor(report.status || 'New')}>
-                              {report.status || 'New'}
-                            </Badge>
-                          </TableCell>
-                          <TableCell>{report.type}</TableCell>
-                          <TableCell>{report.createdAt ? new Date(report.createdAt).toLocaleDateString() : 'N/A'}</TableCell>
-                          <TableCell>
-                            <div className="flex gap-2">
-                              <Button size="sm" variant="outline">
-                                <Eye className="h-3 w-3 mr-1" />
-                                View
-                              </Button>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Report ID</TableHead>
+                      <TableHead>Type</TableHead>
+                      <TableHead>Severity</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead>Location</TableHead>
+                      <TableHead>Assigned To</TableHead>
+                      <TableHead>Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {incidentReports.map(report => (
+                      <TableRow key={report.id}>
+                        <TableCell className="font-medium">{report.id}</TableCell>
+                        <TableCell>{report.type}</TableCell>
+                        <TableCell>
+                          <Badge className={getPriorityColor(report.severity)}>
+                            {report.severity}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          <Badge className={getStatusColor(report.status)}>
+                            {report.status}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>{report.location}</TableCell>
+                        <TableCell>{report.assignedTo}</TableCell>
+                        <TableCell>
+                          <div className="flex gap-2">
+                            <Button size="sm" variant="outline">
+                              <Eye className="h-3 w-3 mr-1" />
+                              View
+                            </Button>
+                            {report.assignedTo === 'Unassigned' && (
                               <Button 
                                 size="sm"
                                 onClick={() => handleAssignCase(report.id)}
                               >
                                 Assign
                               </Button>
-                            </div>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                      
-                      {/* Mock local reports */}
-                      {incidentReports.map(report => (
-                        <TableRow key={`local-${report.id}`}>
-                          <TableCell className="font-medium">{report.id}</TableCell>
-                          <TableCell>{report.type}</TableCell>
-                          <TableCell>
-                            <Badge className={getPriorityColor(report.severity)}>
-                              {report.severity}
-                            </Badge>
-                          </TableCell>
-                          <TableCell>
-                            <Badge className={getStatusColor(report.status)}>
-                              {report.status}
-                            </Badge>
-                          </TableCell>
-                          <TableCell>{report.location}</TableCell>
-                          <TableCell>{report.timestamp}</TableCell>
-                          <TableCell>
-                            <div className="flex gap-2">
-                              <Button size="sm" variant="outline">
-                                <Eye className="h-3 w-3 mr-1" />
-                                View
-                              </Button>
-                              {report.assignedTo === 'Unassigned' && (
-                                <Button 
-                                  size="sm"
-                                  onClick={() => handleAssignCase(report.id)}
-                                >
-                                  Assign
-                                </Button>
-                              )}
-                            </div>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                      
-                      {backendReports.length === 0 && incidentReports.length === 0 && (
-                        <TableRow>
-                          <TableCell colSpan={7} className="text-center py-8 text-gray-500">
-                            No incident reports found.
-                          </TableCell>
-                        </TableRow>
-                      )}
-                    </TableBody>
-                  </Table>
-                )}
+                            )}
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
               </CardContent>
             </Card>
           </TabsContent>

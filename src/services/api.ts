@@ -4,38 +4,21 @@ export interface ForumPost {
   id: number;
   title: string;
   content: string;
-  userId: string;
+  category: string;
+  author: string;
   timestamp: string;
-  category?: string;
-  author?: string;
-  tags?: string[];
+  tags: string[];
   flagged?: boolean;
   isAdviceSeeker?: boolean;
   school?: string;
 }
 
 export interface CreatePostData {
-  title: string;
+  type: "physical" | "verbal" | "cyber";
   content: string;
-  userId: string;
-}
-
-export interface IncidentReport {
-  id: string;
-  title: string;
-  description: string;
-  type: "phishing" | "malware" | "scam" | "other";
-  userId: string;
-  status?: string;
-  createdAt?: string;
-  updatedAt?: string;
-}
-
-export interface CreateReportData {
-  title: string;
-  description: string;
-  type: "phishing" | "malware" | "scam" | "other";
-  userId: string;
+  category?: string;
+  tags?: string[];
+  isAnonymous: boolean;
 }
 
 // Get all posts
@@ -61,36 +44,25 @@ export const getPosts = async (): Promise<ForumPost[]> => {
   }
 };
 
-// Create new post (authenticated)
+// Create new post (anonymous)
 export const createPost = async (postData: CreatePostData): Promise<ForumPost> => {
-  const token = getAuthToken();
   console.log('Creating post with data:', postData);
   console.log('Sending to URL:', `${BASE_URL}/api/posts`);
   
-  const headers: HeadersInit = {
-    'Content-Type': 'application/json',
-  };
-  
-  if (token) {
-    headers['Authorization'] = `Bearer ${token}`;
-  }
-  
   const response = await fetch(`${BASE_URL}/api/posts`, {
     method: 'POST',
-    headers,
+    headers: {
+      'Content-Type': 'application/json',
+    },
     body: JSON.stringify(postData),
   });
   
   console.log('Response status:', response.status);
+  console.log('Response headers:', response.headers);
   
   if (!response.ok) {
     const errorText = await response.text();
     console.error('Error response:', errorText);
-    
-    if (response.status === 401) {
-      throw new Error('Authentication required. Please log in.');
-    }
-    
     throw new Error(`Failed to create post: ${response.status} ${errorText}`);
   }
   return response.json();
@@ -114,104 +86,4 @@ export const flagPost = async (postId: number, token?: string): Promise<void> =>
   if (!response.ok) {
     throw new Error('Failed to flag post');
   }
-};
-
-// Helper function to get auth token
-const getAuthToken = (): string | null => {
-  return localStorage.getItem('authToken');
-};
-
-// Get all reports (admin/auth required)
-export const getReports = async (): Promise<IncidentReport[]> => {
-  const token = getAuthToken();
-  console.log('Fetching reports from:', `${BASE_URL}/api/reports`);
-  
-  const headers: HeadersInit = {
-    'Content-Type': 'application/json',
-  };
-  
-  if (token) {
-    headers['Authorization'] = `Bearer ${token}`;
-  }
-
-  try {
-    const response = await fetch(`${BASE_URL}/api/reports`, {
-      headers,
-    });
-    
-    console.log('GET reports response status:', response.status);
-    
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error('GET reports error:', errorText);
-      throw new Error(`Failed to fetch reports: ${response.status} ${errorText}`);
-    }
-    
-    const data = await response.json();
-    console.log('Fetched reports:', data);
-    return data;
-  } catch (error) {
-    console.error('Network error fetching reports:', error);
-    throw error;
-  }
-};
-
-// Create new incident report (requires auth)
-export const createReport = async (reportData: CreateReportData): Promise<IncidentReport> => {
-  const token = getAuthToken();
-  console.log('Creating report with data:', reportData);
-  console.log('Sending to URL:', `${BASE_URL}/api/reports`);
-  
-  const headers: HeadersInit = {
-    'Content-Type': 'application/json',
-  };
-  
-  if (token) {
-    headers['Authorization'] = `Bearer ${token}`;
-  }
-
-  const response = await fetch(`${BASE_URL}/api/reports`, {
-    method: 'POST',
-    headers,
-    body: JSON.stringify(reportData),
-  });
-  
-  console.log('Report creation response status:', response.status);
-  
-  if (!response.ok) {
-    const errorText = await response.text();
-    console.error('Error creating report:', errorText);
-    
-    if (response.status === 401) {
-      throw new Error('Authentication required. Please log in.');
-    }
-    
-    throw new Error(`Failed to create report: ${response.status} ${errorText}`);
-  }
-  
-  return response.json();
-};
-
-// Get single report by ID
-export const getReportById = async (reportId: string): Promise<IncidentReport> => {
-  const token = getAuthToken();
-  
-  const headers: HeadersInit = {
-    'Content-Type': 'application/json',
-  };
-  
-  if (token) {
-    headers['Authorization'] = `Bearer ${token}`;
-  }
-
-  const response = await fetch(`${BASE_URL}/api/reports/${reportId}`, {
-    headers,
-  });
-  
-  if (!response.ok) {
-    const errorText = await response.text();
-    throw new Error(`Failed to fetch report: ${response.status} ${errorText}`);
-  }
-  
-  return response.json();
 };

@@ -25,16 +25,14 @@ import { useToast } from '@/hooks/use-toast';
 import PageLayout from '@/components/PageLayout';
 import { useReports } from '@/contexts/ReportContext';
 import { useAuth } from '@/contexts/AuthContext';
-import { createReport, type CreateReportData } from '@/services/api';
 
 // Define form schema
 const reportFormSchema = z.object({
-  title: z.string().min(5, { message: 'Please provide a title (min. 5 characters)' }),
   incidentType: z.string().min(1, { message: 'Please select an incident type' }),
   platform: z.string().min(1, { message: 'Please select where this occurred' }),
   description: z.string().min(10, { message: 'Please provide a brief description (min. 10 characters)' }),
-  location: z.string().min(1, { message: 'Please specify the location' }),
-  urgency: z.enum(['low', 'medium', 'high'], { required_error: 'Please select urgency level' }),
+  date: z.string().optional(),
+  severity: z.enum(['low', 'medium', 'high'], { required_error: 'Please select severity' }),
   yourRole: z.string().min(1, { message: 'Please select your role' }),
   evidence: z.string().optional(),
   anonymous: z.boolean().default(true),
@@ -65,12 +63,11 @@ const ReportForm = () => {
   const form = useForm<ReportFormValues>({
     resolver: zodResolver(reportFormSchema),
     defaultValues: {
-      title: '',
       incidentType: '',
       platform: '',
       description: '',
-      location: '',
-      urgency: 'medium' as const,
+      date: new Date().toISOString().split('T')[0],
+      severity: 'medium',
       yourRole: '',
       evidence: '',
       anonymous: true,
@@ -78,45 +75,26 @@ const ReportForm = () => {
     }
   });
 
-  const onSubmit = async (data: ReportFormValues) => {
+  const onSubmit = (data: ReportFormValues) => {
     console.log('Form submitted:', data);
     
-    try {
-      // Prepare data for backend API
-      const reportData: CreateReportData = {
-        title: data.title,
-        description: data.description,
-        type: data.urgency === 'high' ? 'malware' : data.urgency === 'medium' ? 'phishing' : 'scam',
-        userId: "anonymous_user" // You can replace this with actual user ID when available
-      };
-
-      // Submit to backend
-      const createdReport = await createReport(reportData);
-      console.log('Report created successfully:', createdReport);
-      
-      // Also add to local context for immediate UI update
-      addReport({
-        type: data.incidentType,
-        platform: data.platform,
-        severity: data.urgency,
-        date: new Date().toISOString().split('T')[0],
-        description: data.description,
-      });
-      
-      toast({
-        title: "Report submitted successfully",
-        description: "Thank you for helping to create a safer environment. Your report has been sent to administrators.",
-      });
-      setSubmitted(true);
-      
-    } catch (error) {
-      console.error('Error submitting report:', error);
-      toast({
-        title: "Error submitting report",
-        description: error instanceof Error ? error.message : "Failed to submit report. Please try again.",
-        variant: "destructive",
-      });
-    }
+    // Add the new report to our context
+    addReport({
+      type: data.incidentType,
+      platform: data.platform,
+      severity: data.severity,
+      date: data.date || new Date().toISOString().split('T')[0],
+      description: data.description,
+    });
+    
+    toast({
+      title: "Report submitted successfully",
+      description: "Thank you for helping to create a safer environment.",
+    });
+    setSubmitted(true);
+    
+    // Option to navigate to dashboard automatically
+    // setTimeout(() => navigate('/dashboard'), 3000);
   };
 
   if (submitted) {
@@ -166,23 +144,6 @@ const ReportForm = () => {
             <CardContent className="pt-6">
               <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-                  <FormField
-                    control={form.control}
-                    name="title"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Report Title *</FormLabel>
-                        <FormControl>
-                          <Input 
-                            placeholder="Brief summary of the incident" 
-                            {...field} 
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <FormField
                       control={form.control}
@@ -260,15 +221,12 @@ const ReportForm = () => {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <FormField
                       control={form.control}
-                      name="location"
+                      name="date"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Location *</FormLabel>
+                          <FormLabel>When did this happen?</FormLabel>
                           <FormControl>
-                            <Input 
-                              placeholder="Where did this occur? (e.g., Main Office, School Name)" 
-                              {...field} 
-                            />
+                            <Input type="date" {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -303,10 +261,10 @@ const ReportForm = () => {
                   
                   <FormField
                     control={form.control}
-                    name="urgency"
+                    name="severity"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Urgency Level *</FormLabel>
+                        <FormLabel>How serious do you consider this?</FormLabel>
                         <FormControl>
                           <RadioGroup
                             onValueChange={field.onChange}
