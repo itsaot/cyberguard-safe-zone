@@ -395,8 +395,8 @@ const ModeratorDashboard = () => {
                           <TableCell className="font-medium">{report.id}</TableCell>
                           <TableCell>{report.title}</TableCell>
                           <TableCell>
-                            <Badge className={getPriorityColor('Medium')}>
-                              {report.type || 'Medium'}
+                            <Badge className={getPriorityColor(report.urgency === 'low' ? 'Low' : report.urgency === 'medium' ? 'Medium' : 'High')}>
+                              {report.urgency}
                             </Badge>
                           </TableCell>
                           <TableCell>
@@ -404,7 +404,7 @@ const ModeratorDashboard = () => {
                               {report.status || 'New'}
                             </Badge>
                           </TableCell>
-                          <TableCell>{report.type}</TableCell>
+                          <TableCell>{report.location}</TableCell>
                           <TableCell>{report.createdAt ? new Date(report.createdAt).toLocaleDateString() : 'N/A'}</TableCell>
                           <TableCell>
                             <div className="flex gap-2">

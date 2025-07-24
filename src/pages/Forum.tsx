@@ -92,17 +92,17 @@ const ForumPost = ({ post, onFlag }: { post: any, onFlag: (id: number) => void }
 };
 
 const CreatePostDialog = ({ onPostCreated }: { onPostCreated: () => void }) => {
-  const [title, setTitle] = useState('');
+  const [type, setType] = useState<"physical" | "verbal" | "cyber">("cyber");
   const [content, setContent] = useState('');
   const [isOpen, setIsOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
 
   const handlePostSubmit = async () => {
-    if (!title.trim() || !content.trim()) {
+    if (!content.trim()) {
       toast({
         title: "Missing Information",
-        description: "Please enter both title and content for your post.",
+        description: "Please enter your post content.",
         duration: 3000,
       });
       return;
@@ -112,21 +112,21 @@ const CreatePostDialog = ({ onPostCreated }: { onPostCreated: () => void }) => {
     
     try {
       const postData: CreatePostData = {
-        title,
+        type,
         content,
-        userId: "anonymous_user" // You can replace this with actual user ID when available
+        isAnonymous: true
       };
 
       await createPost(postData);
       
       toast({
         title: "Post Created Successfully",
-        description: "Your post has been added to the forum.",
+        description: "Your anonymous post has been added to the forum.",
         duration: 3000,
       });
       
       // Reset form
-      setTitle('');
+      setType("cyber");
       setContent('');
       setIsOpen(false);
       
@@ -137,7 +137,7 @@ const CreatePostDialog = ({ onPostCreated }: { onPostCreated: () => void }) => {
       console.error('Error creating post:', error);
       toast({
         title: "Error",
-        description: error instanceof Error ? error.message : "Failed to create post. Please try again.",
+        description: "Failed to create post. Please try again.",
         variant: "destructive",
         duration: 3000,
       });
@@ -156,17 +156,21 @@ const CreatePostDialog = ({ onPostCreated }: { onPostCreated: () => void }) => {
       </DialogTrigger>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Create Post</DialogTitle>
+          <DialogTitle>Create Anonymous Post</DialogTitle>
         </DialogHeader>
         <div className="space-y-4">
           <div>
-            <Label htmlFor="title">Title *</Label>
-            <Input
-              id="title"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              placeholder="Enter post title..."
-            />
+            <Label htmlFor="type">Type of Incident *</Label>
+            <Select value={type} onValueChange={(value: "physical" | "verbal" | "cyber") => setType(value)}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select incident type" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="physical">Physical Bullying</SelectItem>
+                <SelectItem value="verbal">Verbal Bullying</SelectItem>
+                <SelectItem value="cyber">Cyberbullying</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
           
           <div>
@@ -175,7 +179,7 @@ const CreatePostDialog = ({ onPostCreated }: { onPostCreated: () => void }) => {
               id="content"
               value={content}
               onChange={(e) => setContent(e.target.value)}
-              placeholder="Share your thoughts or experience..."
+              placeholder="Describe what happened..."
               rows={4}
             />
           </div>
@@ -185,7 +189,7 @@ const CreatePostDialog = ({ onPostCreated }: { onPostCreated: () => void }) => {
             onClick={handlePostSubmit}
             disabled={isSubmitting}
           >
-            {isSubmitting ? 'Posting...' : 'Create Post'}
+            {isSubmitting ? 'Posting...' : 'Post Anonymously'}
           </Button>
         </div>
       </DialogContent>

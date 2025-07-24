@@ -4,28 +4,30 @@ export interface ForumPost {
   id: number;
   title: string;
   content: string;
-  userId: string;
+  category: string;
+  author: string;
   timestamp: string;
-  category?: string;
-  author?: string;
-  tags?: string[];
+  tags: string[];
   flagged?: boolean;
   isAdviceSeeker?: boolean;
   school?: string;
 }
 
 export interface CreatePostData {
-  title: string;
+  type: "physical" | "verbal" | "cyber";
   content: string;
-  userId: string;
+  category?: string;
+  tags?: string[];
+  isAnonymous: boolean;
 }
 
 export interface IncidentReport {
   id: string;
   title: string;
   description: string;
-  type: "phishing" | "malware" | "scam" | "other";
-  userId: string;
+  location: string;
+  urgency: "low" | "medium" | "high";
+  reportedBy?: string;
   status?: string;
   createdAt?: string;
   updatedAt?: string;
@@ -34,8 +36,9 @@ export interface IncidentReport {
 export interface CreateReportData {
   title: string;
   description: string;
-  type: "phishing" | "malware" | "scam" | "other";
-  userId: string;
+  location: string;
+  urgency: "low" | "medium" | "high";
+  reportedBy?: string;
 }
 
 // Get all posts
@@ -61,36 +64,25 @@ export const getPosts = async (): Promise<ForumPost[]> => {
   }
 };
 
-// Create new post (authenticated)
+// Create new post (anonymous)
 export const createPost = async (postData: CreatePostData): Promise<ForumPost> => {
-  const token = getAuthToken();
   console.log('Creating post with data:', postData);
   console.log('Sending to URL:', `${BASE_URL}/api/posts`);
   
-  const headers: HeadersInit = {
-    'Content-Type': 'application/json',
-  };
-  
-  if (token) {
-    headers['Authorization'] = `Bearer ${token}`;
-  }
-  
   const response = await fetch(`${BASE_URL}/api/posts`, {
     method: 'POST',
-    headers,
+    headers: {
+      'Content-Type': 'application/json',
+    },
     body: JSON.stringify(postData),
   });
   
   console.log('Response status:', response.status);
+  console.log('Response headers:', response.headers);
   
   if (!response.ok) {
     const errorText = await response.text();
     console.error('Error response:', errorText);
-    
-    if (response.status === 401) {
-      throw new Error('Authentication required. Please log in.');
-    }
-    
     throw new Error(`Failed to create post: ${response.status} ${errorText}`);
   }
   return response.json();
