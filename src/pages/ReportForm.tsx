@@ -25,14 +25,16 @@ import { useToast } from '@/hooks/use-toast';
 import PageLayout from '@/components/PageLayout';
 import { useReports } from '@/contexts/ReportContext';
 import { useAuth } from '@/contexts/AuthContext';
+import { createReport, type CreateReportData } from '@/services/api';
 
 // Define form schema
 const reportFormSchema = z.object({
+  title: z.string().min(5, { message: 'Please provide a title (min. 5 characters)' }),
   incidentType: z.string().min(1, { message: 'Please select an incident type' }),
   platform: z.string().min(1, { message: 'Please select where this occurred' }),
   description: z.string().min(10, { message: 'Please provide a brief description (min. 10 characters)' }),
-  date: z.string().optional(),
-  severity: z.enum(['low', 'medium', 'high'], { required_error: 'Please select severity' }),
+  location: z.string().min(1, { message: 'Please specify the location' }),
+  urgency: z.enum(['low', 'medium', 'high'], { required_error: 'Please select urgency level' }),
   yourRole: z.string().min(1, { message: 'Please select your role' }),
   evidence: z.string().optional(),
   anonymous: z.boolean().default(true),
@@ -63,11 +65,12 @@ const ReportForm = () => {
   const form = useForm<ReportFormValues>({
     resolver: zodResolver(reportFormSchema),
     defaultValues: {
+      title: '',
       incidentType: '',
       platform: '',
       description: '',
-      date: new Date().toISOString().split('T')[0],
-      severity: 'medium',
+      location: '',
+      urgency: 'medium' as const,
       yourRole: '',
       evidence: '',
       anonymous: true,
@@ -75,26 +78,45 @@ const ReportForm = () => {
     }
   });
 
-  const onSubmit = (data: ReportFormValues) => {
+  const onSubmit = async (data: ReportFormValues) => {
     console.log('Form submitted:', data);
     
-    // Add the new report to our context
-    addReport({
-      type: data.incidentType,
-      platform: data.platform,
-      severity: data.severity,
-      date: data.date || new Date().toISOString().split('T')[0],
-      description: data.description,
-    });
-    
-    toast({
-      title: "Report submitted successfully",
-      description: "Thank you for helping to create a safer environment.",
-    });
-    setSubmitted(true);
-    
-    // Option to navigate to dashboard automatically
-    // setTimeout(() => navigate('/dashboard'), 3000);
+    try {
+      // Prepare data for backend API
+      const reportData: CreateReportData = {
+        title: data.title,
+        description: data.description,
+        location: data.location,
+        urgency: data.urgency,
+      };
+
+      // Submit to backend
+      const createdReport = await createReport(reportData);
+      console.log('Report created successfully:', createdReport);
+      
+      // Also add to local context for immediate UI update
+      addReport({
+        type: data.incidentType,
+        platform: data.platform,
+        severity: data.urgency,
+        date: new Date().toISOString().split('T')[0],
+        description: data.description,
+      });
+      
+      toast({
+        title: "Report submitted successfully",
+        description: "Thank you for helping to create a safer environment. Your report has been sent to administrators.",
+      });
+      setSubmitted(true);
+      
+    } catch (error) {
+      console.error('Error submitting report:', error);
+      toast({
+        title: "Error submitting report",
+        description: error instanceof Error ? error.message : "Failed to submit report. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   if (submitted) {
@@ -144,6 +166,23 @@ const ReportForm = () => {
             <CardContent className="pt-6">
               <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                  <FormField
+                    control={form.control}
+                    name="title"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Report Title *</FormLabel>
+                        <FormControl>
+                          <Input 
+                            placeholder="Brief summary of the incident" 
+                            {...field} 
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <FormField
                       control={form.control}
@@ -221,12 +260,15 @@ const ReportForm = () => {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <FormField
                       control={form.control}
-                      name="date"
+                      name="location"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>When did this happen?</FormLabel>
+                          <FormLabel>Location *</FormLabel>
                           <FormControl>
-                            <Input type="date" {...field} />
+                            <Input 
+                              placeholder="Where did this occur? (e.g., Main Office, School Name)" 
+                              {...field} 
+                            />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -261,10 +303,10 @@ const ReportForm = () => {
                   
                   <FormField
                     control={form.control}
-                    name="severity"
+                    name="urgency"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>How serious do you consider this?</FormLabel>
+                        <FormLabel>Urgency Level *</FormLabel>
                         <FormControl>
                           <RadioGroup
                             onValueChange={field.onChange}

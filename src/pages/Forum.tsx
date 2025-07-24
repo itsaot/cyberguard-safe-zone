@@ -227,7 +227,16 @@ const Forum = () => {
 
   useEffect(() => {
     fetchPosts();
-  }, []);
+    
+    // Real-time sync with polling every 10 seconds for admin users
+    if (isAdmin) {
+      const interval = setInterval(() => {
+        fetchPosts();
+      }, 10000); // Poll every 10 seconds for admins
+
+      return () => clearInterval(interval);
+    }
+  }, [isAdmin]);
 
   const handlePostCreated = async () => {
     await fetchPosts(); // Refresh posts after creating a new one
